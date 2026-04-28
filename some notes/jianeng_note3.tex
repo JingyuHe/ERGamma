@@ -1,0 +1,68 @@
+\documentclass[11pt, oneside]{article} 
+\usepackage{geometry}
+\geometry{letterpaper} 
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\newcommand{\dd}{\mathbf{d}}
+
+\begin{document}
+\section{Dirichlet-Multinomial Model}
+Let there be $K$ classes and $M\times K$ count observations,  where $n_{mk}$ is the count of $k$-th class in the $m$-th instance and $p_{mk}$ the underlying probability. $\alpha = (\alpha_1, \alpha_2, ..., \alpha_K), \alpha_0 = \sum_{k=1}^K \alpha_k$. The model is as follows, for $m=1, 2, ..., M$,
+\begin{align*}
+p_m | \alpha & \sim \text{Dirichlet}(\alpha_1, \alpha_2, ..., \alpha_K)\\
+n_m | p_m & \sim \text{Multinomial}(p_{m1}, p_{m2}, ..., p_{mK})
+\end{align*}
+where $n_m = (n_{m1}, n_{m2}, ..., n_{mK})', p_m = (p_{m1}, p_{m2}, ..., p_{mK})'$. 
+We assume $(n_m, p_m)$ are independent across $m$. Also, given $p_m$, $n_m$ is independent of $\alpha$. Now we consider the posterior density $f(\alpha|n)$, with $n = (n_1, n_2, ..., n_M)$.
+
+\begin{align*}
+f(\alpha | n) &= \int f(\alpha, p | n) dp\\
+&= \int \frac{f(\alpha)f(p|\alpha)f(n|p)}{f(n)} dp \\
+&= \frac{f(\alpha)}{f(n)} \int \prod_{m=1}^M f(p_m|\alpha)f(n_m|p_m) dp\\
+&= \frac{f(\alpha)}{f(n)C(n)} \int \prod_{m=1}^M \left(\frac{\Gamma(\alpha_0)}{\prod_{k=1}^K \Gamma(\alpha_k)}\prod_{k=1}^K p_{mk}^{\alpha_k-1} \right)\left(\prod_{k=1}^K p_{mk}^{n_{mk}}\right)   dp\\
+&= \frac{f(\alpha)}{f(n)C(n)} \int \prod_{m=1}^M \left(\frac{\Gamma(\alpha_0)}{\prod_{k=1}^K \Gamma(\alpha_k)}\prod_{k=1}^K p_{mk}^{\alpha_k+n_{mk}-1} \right) dp\\
+&= \frac{f(\alpha)}{f(n)C(n)} \int \prod_{m=1}^M \left(\int_0^\infty \eta_m^{\alpha_0 - 1} e^{-\eta_m} d \eta_m \prod_{k=1}^K \int_0^\infty \alpha_k e^{\gamma\alpha_k} e^{-\alpha_k^2 w_{mk}}f(w_{mk})dw_{mk}\prod_{k=1}^K p_{mk}^{\alpha_k+n_{mk}-1} \right) dp\\
+&=  \int f(\alpha, p, \eta, w | n)dpd\eta dw\\
+\end{align*}
+where $C(n) = \prod_{m=1}^M \frac{\prod_{k=1}^K \Gamma(n_{mk}+1)}{\Gamma(1 + \sum_{k=1}^M n_{mk})}$,
+\begin{align*}
+f(\alpha, p, \eta, w | n) &\propto \left(f(\alpha) \prod_{k=1}^K \alpha_k^M e^{M\gamma\alpha_k} \right)\prod_{m=1}^M  \left( \eta_m^{\alpha_0 - 1} e^{-\eta_m}  \prod_{k=1}^K   e^{-\alpha_k^2 w_{mk}}f(w_{mk})\prod_{k=1}^K p_{mk}^{\alpha_k+n_{mk}-1} \right) 
+\end{align*}
+and $f(w_{mk})$ is the density of $\text{P-IG}$. 
+
+\section{Gibbs Sampler}
+We further assume independent $1/\alpha_k$ prior for each $\alpha_k$. Then
+\begin{align*}
+p_m |\alpha, \eta, w, n &\sim  \text{Dirichlet}(\alpha_1+n_{m1}, \alpha_2+n_{m2}, ..., \alpha_K+n_{mK}),\, m=1,2,...,M\\
+\eta_m | \alpha, p, w, n &\sim \Gamma(\alpha_0, 1), \, m=1,2,...,M\\
+w_{mk} | \alpha, p, \eta, n &\sim \text{P-IG}({\bf d}, \sqrt{2}\alpha_k),\, k=1,2,...,K, m=1,2,...,M\\
+f(\alpha_k | p, \eta, w, n) &\propto \alpha_k^{M-1} e^{-a_k\alpha_k^2 + b_k \alpha_k},\, k=1,2,...,K 
+\end{align*} 
+For the conditional posterior of $\alpha$, the parameters are 
+\begin{align*}
+a_k &= \sum_{m=1}^M w_{mk}\\
+b_k &= M\gamma + \sum_{m=1}^M \log(\eta_m p_{mk})
+\end{align*}
+and we now show how to sample from it. 
+
+\subsection{Sampling from Conditional Posterior of $\alpha$ }
+The probability density $h(x)$ is defined as 
+$$
+h(x|p,a,b) = \frac{x^{p-1}e^{-ax^2+bx}}{\int_0^\infty x^{p-1}e^{-ax^2+bx}dx},\; (x, p,a >0, b\neq 0).
+$$
+Note that we can write it as a multiplication 
+\begin{align*}
+h(x|p,a,b) &=   \frac{x^{p-1}e^{-ax^2+bx}}{\int_0^\infty x^{p-1}e^{-ax^2+bx}dx} \\
+&=  \frac{x^{p-1}e^{-(\tau|b|-b)x}e^{-a(x - \tau|b|/2a)^2}}{\int_0^\infty x^{p-1}e^{-(\tau|b|-b)x}e^{-a(x - \tau|b|/2a)^2}dx}\\
+& = ce^{-a(x - \tau|b|/2a)^2}g(x|p,\tau|b|-b) 
+\end{align*}
+where $g(x|p,b)$  is the density of a Gamma random variable with shape $p$ and rate $\tau|b|-b > 0$. $$0\leq e^{-a(x - \tau|b|/2a)^2} \leq 1,\, c =\frac{\int_0^\infty x^{p-1}e^{-(\tau|b|-b)x}dx}{\int_0^\infty x^{p-1}e^{-(\tau|b|-b)x}e^{-a(x - \tau|b|/2a)^2}dx} \geq 1$$
+We sample from $h(x)$ by rejection method (Devroye 3.3): 
+\begin{enumerate}
+\item Generate $X\sim Gamma(p, \tau|b|-b)$ and $U\sim Unif[0,1]$
+\item Return $X$ until $U \leq e^{-a(X - \tau|b|/2a)^2}$.
+\end{enumerate}
+If $b>0$, we set $\tau = \sqrt{1/4 + 2ap/b^2} + 1/2$; if $b<0$, we set $\tau = \sqrt{1/4 + 2ap/b^2} - 1/2$. Then $e^{-a(E(X) - \tau|b|/2a)^2} = 1$.
+
+\end{document}	

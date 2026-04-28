@@ -1,0 +1,83 @@
+\begin{thebibliography}{}
+
+\bibitem[\protect\citeauthoryear{Blei, Ng, and Jordan}{Blei
+  et~al.}{2003}]{blei2003latent}
+Blei, D.~M., A.~Y. Ng, and M.~I. Jordan (2003).
+\newblock Latent dirichlet allocation.
+\newblock {\em Journal of machine Learning research\/}~{\em 3\/}(Jan),
+  993--1022.
+
+\bibitem[\protect\citeauthoryear{Bondesson}{Bondesson}{1982}]{bondesson1982simulation}
+Bondesson, L. (1982).
+\newblock On simulation from infinitely divisible distributions.
+\newblock {\em Advances in Applied Probability\/}~{\em 14\/}(4), 855--869.
+
+\bibitem[\protect\citeauthoryear{Bondesson}{Bondesson}{1992}]{bondesson1992generalized}
+Bondesson, L. (1992).
+\newblock Generalized gamma convolutions and related classes of distributions
+  and densities.
+\newblock {\em Lecture Notes in Statistics\/}~{\em 76}.
+
+\bibitem[\protect\citeauthoryear{Escobar and West}{Escobar and
+  West}{1995}]{escobar1995bayesian}
+Escobar, M.~D. and M.~West (1995).
+\newblock Bayesian density estimation and inference using mixtures.
+\newblock {\em Journal of the american statistical association\/}~{\em
+  90\/}(430), 577--588.
+
+\bibitem[\protect\citeauthoryear{Ferguson and Klass}{Ferguson and
+  Klass}{1972}]{ferguson1972representation}
+Ferguson, T.~S. and M.~J. Klass (1972).
+\newblock A representation of independent increment processes without gaussian
+  components.
+\newblock {\em The Annals of Mathematical Statistics\/}~{\em 43\/}(5),
+  1634--1643.
+
+\bibitem[\protect\citeauthoryear{Hartman}{Hartman}{1976}]{hartman1976completely}
+Hartman, P. (1976).
+\newblock Completely monotone families of solutions of $ n $-th order linear
+  differential equations and infinitely divisible distributions.
+\newblock {\em Annali della Scuola Normale Superiore di Pisa-Classe di
+  Scienze\/}~{\em 3\/}(2), 267--287.
+
+\bibitem[\protect\citeauthoryear{Minka}{Minka}{2000}]{minka2000estimating}
+Minka, T. (2000).
+\newblock Estimating a dirichlet distribution.
+
+\bibitem[\protect\citeauthoryear{Polson, Scott, and Windle}{Polson
+  et~al.}{2013}]{polson2013bayesian}
+Polson, N.~G., J.~G. Scott, and J.~Windle (2013).
+\newblock Bayesian inference for logistic models using p{\'o}lya--gamma latent
+  variables.
+\newblock {\em Journal of the American statistical Association\/}~{\em
+  108\/}(504), 1339--1349.
+
+\bibitem[\protect\citeauthoryear{Polson, Scott, et~al.}{Polson
+  et~al.}{2011}]{polson2011data}
+Polson, N.~G., S.~L. Scott, et~al. (2011).
+\newblock Data augmentation for support vector machines.
+\newblock {\em Bayesian Analysis\/}~{\em 6\/}(1), 1--23.
+
+\bibitem[\protect\citeauthoryear{Roynette and Yor}{Roynette and
+  Yor}{2005}]{roynette2005couples}
+Roynette, B. and M.~Yor (2005).
+\newblock Couples de wald ind{\'e}finiment divisibles. exemples li{\'e}s {\`a}
+  la fonction gamma d'euler et {\`a} la fonction zeta de riemann.
+\newblock In {\em Annales de l'institut Fourier}, Volume~55, pp.\  1219--1284.
+  Chartres: L'Institut, 1950-.
+
+\bibitem[\protect\citeauthoryear{Walker and Damien}{Walker and
+  Damien}{2000}]{walker2000miscellanea}
+Walker, S. and P.~Damien (2000).
+\newblock Miscellanea. representations of l{\'e}vy processes without gaussian
+  components.
+\newblock {\em Biometrika\/}~{\em 87\/}(2), 477--483.
+
+\bibitem[\protect\citeauthoryear{Windle, Polson, and Scott}{Windle
+  et~al.}{2014}]{windle2014sampling}
+Windle, J., N.~G. Polson, and J.~G. Scott (2014).
+\newblock Sampling polya-gamma random variates: alternate and approximate
+  techniques.
+\newblock {\em arXiv preprint arXiv:1405.0506\/}.
+
+\end{thebibliography}

@@ -1,0 +1,27 @@
+INFO: latexindent version 3.4.1, 2018-01-18, a script to indent .tex files
+      latexindent lives here: /usr/local/texlive/2018/texmf-dist/scripts/latexindent/
+      Mon Apr 29 16:56:24 2019
+      Filename: XBART.tex
+INFO: Processing switches:
+      -w|--overwrite: Overwrite mode active, will make a back up of XBART.tex first
+INFO: Directory for backup files and indent.log: .
+INFO: YAML settings read: defaultSettings.yaml
+      Reading defaultSettings.yaml from /usr/local/texlive/2018/texmf-dist/scripts/latexindent/defaultSettings.yaml
+INFO: YAML settings read: indentconfig.yaml or .indentconfig.yaml
+      Home directory is /Users/jingyuhe (didn't find either indentconfig.yaml or .indentconfig.yaml)
+      To specify user settings you would put indentconfig.yaml here: /Users/jingyuhe/indentconfig.yaml
+      Alternatively, you can use the hidden file .indentconfig.yaml as: /Users/jingyuhe/.indentconfig.yaml
+INFO: Backup procedure (-w flag active):
+      ./XBART.bak0 already exists, incrementing by 1... (see maxNumberOfBackUps and onlyOneBackUp)
+      copying XBART.tex to ./XBART.bak1
+      Backup file: ./XBART.bak1
+      XBART.tex will be overwritten after indentation
+INFO: Phase 1: searching for objects
+INFO: Phase 2: finding surrounding indentation
+INFO: Phase 3: indenting objects
+INFO: Phase 4: final indentation check
+INFO: Output routine:
+      Overwriting file XBART.tex
+      --------------
+INFO: Please direct all communication/issues to:
+      https://github.com/cmhughes/latexindent.pl

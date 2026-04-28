@@ -1,0 +1,121 @@
+\documentclass[11pt]{article}%
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{setspace}
+\usepackage[round]{natbib}
+\usepackage{amsmath}%
+\usepackage{amsthm}%
+\usepackage{palatino}
+\usepackage{paralist}
+\usepackage{multirow}
+\usepackage{booktabs}
+\usepackage{dsfont}
+\usepackage{indentfirst}
+\usepackage{enumerate}
+\usepackage{longtable}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{mwe}
+\usepackage[hyperindex,breaklinks]{hyperref}
+\hypersetup{colorlinks=true,       % false: boxed links; true: colored links
+   linkcolor=red,       
+    citecolor=blue,        % color of links to bibliography
+    filecolor=magenta,      % color of file links
+    urlcolor=cyan           % color of external links
+}  
+
+\newcommand{\E}{\text{E}}
+\newcommand{\I}{\text{I}}
+\newcommand{\quantile}{\text{Quantile}}
+\newcommand{\defeq}{\mathrel{\mathop:}=}
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+
+\usepackage{setspace}
+\doublespacing
+
+\bibliographystyle{chicago}
+
+\setcounter{MaxMatrixCols}{10}
+\textwidth=6.6in
+\textheight=8.9in
+\headheight=0.0in
+\oddsidemargin=0.0in
+\headsep=0.0in
+\topmargin=0.0in
+\setlength\parindent{24pt}
+
+\setlength{\abovedisplayskip}{5pt}
+\setlength{\belowdisplayskip}{5pt}
+
+\title{Bayesian Analysis of Exponential Reciprocal Gamma Models}
+
+\author{ 
+}
+
+\date{\today}
+
+\begin{document}
+	
+\maketitle
+%%%%%%%%%%%%%%%%%%%%%
+\begin{abstract}
+%%%%%%%%%%%%%%%%%%%%%
+\noindent Blabla
+
+
+\bigskip
+\noindent {\bf Key Words:} 
+\end{abstract}
+
+\newpage
+\section{Introduction}
+Estimating parameters in a Gamma function \cite{blei2003latent} \cite{escobar1995bayesian}
+
+\cite{bondesson1982simulation} \cite{bondesson1992generalized} \cite{walker2000miscellanea} \cite{ferguson1972representation} \cite{windle2014sampling} \cite{polson2011data} \cite{minka2000estimating}
+
+\cite{roynette2005couples} \cite{hartman1976completely} \cite{polson2013bayesian} 
+
+Generalized Gamma convolution (GGC) can be approximated by a compounded Poisson process. 
+
+\section{Exponential Reciprocal Gamma Distribution}
+
+\begin{equation}
+E[e^{-sX}] = \psi(s) = \exp\left\{-as + \int_{0}^\infty (e^{-sy} - 1) N(dy)\right\}
+\end{equation}
+
+
+By Malmsten's formula 
+\begin{equation}
+\begin{aligned}
+\frac{1}{\Gamma(a + s)} &= \exp\left\{\int_{0}^{\infty} (e^{-sx} + \lambda x - 1) \frac{e^{-ax}}{x}dx \right\}\\
+&= \int_{0}^{\infty} (1 - e^{-\frac{1}{2} s^2 t}) \frac{1 - e^{-\frac{1}{2} \frac{x^2}{t}}}{\sqrt{2\pi t^3}}dt
+\end{aligned}
+\end{equation}
+Let $\frac{1 - e^{-\frac{1}{2} \frac{x^2}{t}}}{\sqrt{2\pi t^3}}dt = U(dt)$
+
+
+\begin{equation}
+\frac{1 - e^{-\frac{1}{2}x^2/t}}{\sqrt{t}} = \int_0^{\infty} e^{-tz}\frac{2\sin^2(x \sqrt{z / 2})}{\sqrt{\pi z}} dz
+\end{equation}
+ 
+\section{Latent Variable Representation of Dirichlet Multinomial Model}
+Posterior
+\begin{equation}
+P(\mathbf{x} \mid \boldsymbol{\alpha}) = \frac{\Gamma(\sum_{k=1}^K \alpha_k)}{\Gamma(N + \sum_{k=1}^K \alpha_k)} \prod_{k=1}^K \frac{\Gamma(N_k + \alpha_k)}{\Gamma(\alpha_k)} e^{-\gamma \sum_{k=1}^K \alpha_k}
+\end{equation}
+
+
+
+\section{Simulations}
+
+\section{Application}
+
+\section{Discussion}
+
+\newpage
+\bibliography{ERgamma} 
+\end{document}
+
+
+

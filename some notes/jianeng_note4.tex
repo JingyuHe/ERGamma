@@ -1,0 +1,77 @@
+\documentclass[11pt, oneside]{article} 
+\usepackage{geometry}
+\geometry{letterpaper} 
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{bm}
+
+\begin{document}
+\section{Negative Binomial Model}
+The count data $\{y_i\}_{i=1}^n$ are assumed to follow the negative binomial distribution
+\begin{equation}
+y_i \sim \mathcal{NB}(\psi, p_i), p_i = \frac{1}{1 + e^{-\bm{x_i'\beta}}}
+\end{equation}
+where  $\{{\bm x_i}\}_{i=1}^n$ are observed covariates. This is equivalent to the Gamma-Poisson mixture,
+\begin{align}
+y_i | \lambda_i &\sim Poisson(\lambda_i) \\
+\lambda_i | \psi, \bm{x_i'\beta} &\sim Gamma(\psi, e^{\bm{-x_i'\beta}})
+\end{align}
+The p.m.f and the first two moments are
+\begin{align}
+f(y_i | \bm{x_i, \beta}, \psi) &= \frac{\Gamma(y_i + \psi)}{y_i!\Gamma(\psi)} \left(\frac{e^{\bm{x_i'\beta}}}{e^{\bm{x_i'\beta}} + 1}\right)^{y_i}  \left(\frac{1}{e^{\bm{x_i'\beta}} + 1}\right)^{\psi} \\
+E(y_i | \bm{x_i, \beta}, \psi) &= \psi e^{\bm{x_i'\beta}} \\
+Var(y_i | \bm{x_i, \beta}, \psi) &= \psi e^{\bm{x_i'\beta}} \left(1 + e^{\bm{x_i'\beta}}\right)
+\end{align}
+
+Note that the model is not GLM. GLM assumes $E(y_i | \bm{x_i, \beta}, \psi) = e^{\bm{x_i'\beta}}$. Let the prior for $\bm\beta$ and $\psi$ be $N(\bm{0}, \Sigma)$ and $p(\psi)$. We then calculate the posterior of ${\bm\theta} = ({\bm\beta}, \psi)$ as 
+\begin{align}
+p({\bm \beta}, \psi | {\bm X, Y}) &\propto p(\psi) \exp\left(-\frac{1}{2} \bm{\beta'} \Sigma^{-1} {\bm\beta}\right) \prod_{i=1}^n \frac{\Gamma(y_i + \psi)}{\Gamma(\psi)} \left(\frac{e^{\bm{x_i'\beta}}}{e^{\bm{x_i'\beta}} + 1}\right)^{y_i}  \left(\frac{1}{e^{\bm{x_i'\beta}} + 1}\right)^{\psi} \\
+&= p(\psi) \exp\left(-\frac{1}{2} \bm{\beta'} \Sigma^{-1} {\bm\beta}\right) \left(\frac{1}{\Gamma(\psi)}\right)^n \prod_{i=1}^n  \Gamma(y_i + \psi)\frac{\left(e^{\bm{x_i'\beta}}\right)^{y_i} }{\left(e^{\bm{x_i'\beta}} + 1\right)^{\psi + y_i}} 
+\end{align}
+
+\subsection{Data Augmentation}
+We introduce latent variables $\bm{\tau, \omega, \xi}$ which follow Gamma, P\'olya-Gamma and ER-Gamma distribution respectively. Using identities
+\begin{align}
+\Gamma(y_i + \psi) &= \int_0^\infty \tau_i^{y_i + \psi-1} e^{-\tau_i} d\tau_i \\
+\frac{\left(e^{\bm{x_i'\beta}}\right)^{y_i} }{\left(e^{\bm{x_i'\beta} } + 1\right)^{\psi + y_i}} &= 2^{-(\psi + y_i)} e^{(y_i-\psi)(\bm{x_i'\beta} )/2} \int_0^\infty e^{-\omega_i (\bm{x_i'\beta} )^2/2} p^{PG}(\omega_i) d\omega_i \\
+\frac{1}{\Gamma(\psi)} &= \int_0^\infty \psi e^{-\xi \psi^2 + \gamma\psi} p^{ERG}(\xi) d\xi
+\end{align}
+where $p^{PG}(\cdot)$ is the prob. density for $PG(\psi + y_i, 0)$ and $p^{ERG}(\cdot) $ the density for $ERG(0)$, the above posterior density of $\bm\theta$ can be re-written as 
+\begin{align}
+p({\bm \beta}, \psi | {\bm X, Y}) &\propto p(\psi) \exp\left(-\frac{1}{2} \bm{\beta'} \Sigma^{-1} {\bm\beta}\right) \int (\psi^n e^{n\gamma\psi-\psi^2\sum_{i=1}^n \xi_i }) \prod_{i=1}^np^{ERG}(\xi_i) d\bm\xi \\
+& \left(\int_0^\infty \prod_{i=1}^n  \tau_i^{y_i + \psi-1} e^{-\tau_i} d\tau_i\right) \left(2^{-n\psi}e^{\sum_{i=1}^n  (y_i-\psi)(\bm{x_i'\beta})/2} \int_0^\infty \prod_{i=1}^ne^{-\omega_i (\bm{x_i'\beta})^2/2} p^{PG}(\omega_i) d\omega_i \right)
+\end{align}
+
+\subsection{Conditional Posteriors}
+\begin{align}
+p(\tau_i | \psi, \bm{\beta, \xi, \omega, X, Y}) &\propto \tau_i^{y_i + \psi-1} e^{-\tau_i} \\
+p(\xi_i | \psi, \bm{\beta, \tau, \omega, X, Y}) &\propto e^{-\psi^2 \xi} p^{ERG}(\xi_i) \\
+p(\omega_i | \psi, \bm{\beta, \tau, \xi, X, Y}) &\propto e^{-\omega_i (\bm{x_i'\beta})^2/2} p^{PG}(\omega_i) \\
+p(\bm\beta | \psi \bm{\beta, \tau, \xi, \omega, X, Y})  &\propto \exp\left(\frac{1}{2}\left(\sum_{i=1}^n(y_i-\psi)\bm{x}_i\right)'\bm\beta - \frac{1}{2} \bm{\beta}'\left(\Sigma^{-1} + \sum_{i=1}^n\omega_i \bm{x_ix_i'}\right) \bm\beta \right)  \\
+p(\psi | \bm{\beta, \tau, \xi, \omega, X, Y}) 
+&\propto p(\psi) \psi^n \exp\left(-  a \psi^2 + b \psi \right) 
+\end{align}
+where 
+\begin{align}
+a &= \sum_{i=1}^n \xi_i\\
+b &= n(\gamma-\log2) + \sum_{i=1}^n \left( \log\tau_i - \bm{x_i'\beta}/2 \right)
+\end{align}
+If we use conjugate prior (Gamma prior as a special case) for $\psi$, then its conditional posterior follows the distribution defined in Thm 2.
+
+In summary, with $p(\psi) \sim \Gamma(\alpha, \kappa)$, $\Omega = \text{diag}(\omega_1,..., \omega_n)$ and $z = \left(\frac{y_1-\psi}{2\omega_1}, ..., \frac{y_n-\psi}{2\omega_n}\right)'$,
+\begin{align}
+\tau_i | \psi, \bm{\beta, \xi, \omega, X, Y} &\sim \Gamma(y_i + \psi, 1) \\
+\xi_i | \psi, \bm{\beta, \tau, \omega, X, Y} &\sim ERG(\psi) \\
+\omega_i | \psi, \bm{\beta, \tau, \xi, X, Y} &\sim PG(\psi+y_i, x_i'\beta) \\
+\bm\beta | \psi \bm{\beta, \tau, \xi, \omega, X, Y})  &\sim N(\bm m, V) \\
+\psi | \bm{\beta, \tau, \xi, \omega, X, Y}
+&\sim H(\alpha+n, a, b+\kappa)
+\end{align}
+where
+\begin{align*}
+V &= \left(\Sigma^{-1} + X'\Omega X\right)^{-1}\\
+m &= VX'\Omega z
+\end{align*}
+
+\end{document}	

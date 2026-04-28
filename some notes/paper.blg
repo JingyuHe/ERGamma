@@ -1,0 +1,51 @@
+This is BibTeX, Version 0.99d (TeX Live 2017)
+Capacity: max_strings=100000, hash_size=100000, hash_prime=85009
+The top-level auxiliary file: paper.aux
+The style file: chicago.bst
+Database file #1: ERgamma.bib
+Warning--page numbers missing in bondesson1992generalized
+Warning--can't use both volume and number fields in roynette2005couples
+Warning--no number and no volume in windle2014sampling
+Warning--page numbers missing in windle2014sampling
+You've used 12 entries,
+            2861 wiz_defined-function locations,
+            699 strings with 7063 characters,
+and the built_in function-call counts, 8250 in all, are:
+= -- 723
+> -- 556
+< -- 2
++ -- 162
+- -- 192
+* -- 733
+:= -- 1481
+add.period$ -- 36
+call.type$ -- 12
+change.case$ -- 83
+chr.to.int$ -- 12
+cite$ -- 16
+duplicate$ -- 225
+empty$ -- 514
+format.name$ -- 224
+if$ -- 1537
+int.to.chr$ -- 1
+int.to.str$ -- 0
+missing$ -- 11
+newline$ -- 62
+num.names$ -- 120
+pop$ -- 52
+preamble$ -- 1
+purify$ -- 155
+quote$ -- 0
+skip$ -- 243
+stack$ -- 0
+substring$ -- 488
+swap$ -- 81
+text.length$ -- 2
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 240
+warning$ -- 4
+while$ -- 123
+width$ -- 0
+write$ -- 159
+(There were 4 warnings)

@@ -1,0 +1,160 @@
+\begin{thebibliography}{28}
+\expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
+\expandafter\ifx\csname url\endcsname\relax
+  \def\url#1{\texttt{#1}}\fi
+\expandafter\ifx\csname urlprefix\endcsname\relax\def\urlprefix{URL: }\fi
+
+\bibitem[{Andrews and Mallows(1974)}]{andrews1974scale}
+Andrews, D.~F. and Mallows, C.~L. (1974) Scale mixtures of {N}ormal
+  distributions.
+\newblock \textit{Journal of the Royal Statistical Society, B}, 99--102.
+
+\bibitem[{Antoniak(1974)}]{antoniak1974}
+Antoniak, C.~E. (1974) Mixtures of dirichlet processes with applications to
+  bayesian nonparametric problems.
+\newblock \textit{Ann. Statist.}, \textbf{2}, 1152--1174.
+\newblock \urlprefix\url{https://doi.org/10.1214/aos/1176342871}.
+
+\bibitem[{Barndorff-Nielsen et~al.(1992)Barndorff-Nielsen, Blaesild and
+  Seshadri}]{barndorff1992multivariate}
+Barndorff-Nielsen, O., Blaesild, P. and Seshadri, V. (1992) Multivariate
+  distributions with generalized inverse gaussian marginals, and associated
+  poisson mixtures.
+\newblock \textit{The Canadian Journal of Statistics/La Revue Canadienne de
+  Statistique}, 109--120.
+
+\bibitem[{Barndorff-Nielsen et~al.(1982)Barndorff-Nielsen, Kent and
+  S{\o}rensen}]{barndorff1982normal}
+Barndorff-Nielsen, O., Kent, J. and S{\o}rensen, M. (1982) Normal variance-mean
+  mixtures and {Z} distributions.
+\newblock \textit{International Statistical Review/Revue Internationale de
+  Statistique}, 145--159.
+
+\bibitem[{Bhattacharya et~al.(2016)Bhattacharya, Chakraborty and
+  Mallick}]{bhattacharya2016fast}
+Bhattacharya, A., Chakraborty, A. and Mallick, B.~K. (2016) Fast sampling with
+  {G}aussian scale mixture priors in high-dimensional regression.
+\newblock \textit{Biometrika}.
+
+\bibitem[{Blei et~al.(2003)Blei, Ng and Jordan}]{blei2003latent}
+Blei, D.~M., Ng, A.~Y. and Jordan, M.~I. (2003) Latent {D}irichlet allocation.
+\newblock \textit{Journal of Machine Learning Research}, \textbf{3}, 993--1022.
+
+\bibitem[{Bondesson(1992)}]{bondesson1992generalized}
+Bondesson, L. (1992) Generalized {G}amma {C}onvolutions and related classes of
+  distributions and densities.
+\newblock \textit{Lecture Notes in Statistics}, \textbf{76}.
+
+\bibitem[{Damien et~al.(1995)Damien, Laud and Smith}]{damien1995approximate}
+Damien, P., Laud, P.~W. and Smith, A.~F. (1995) Approximate random variate
+  generation from infinitely divisible distributions with applications to
+  {B}ayesian inference.
+\newblock \textit{Journal of the Royal Statistical Society B}, 547--563.
+
+\bibitem[{Damsleth(1975)}]{damsleth1975conjugate}
+Damsleth, E. (1975) Conjugate classes for {G}amma distributions.
+\newblock \textit{Scandinavian Journal of Statistics}, 80--84.
+
+\bibitem[{Escobar and West(1995)}]{escobar1995bayesian}
+Escobar, M.~D. and West, M. (1995) Bayesian density estimation and inference
+  using mixtures.
+\newblock \textit{Journal of the American Statistical Association},
+  \textbf{90}, 577--588.
+
+\bibitem[{Ferguson(1973)}]{ferguson1973}
+Ferguson, T.~S. (1973) A bayesian analysis of some nonparametric problems.
+\newblock \textit{Ann. Statist.}, \textbf{1}, 209--230.
+\newblock \urlprefix\url{https://doi.org/10.1214/aos/1176342360}.
+
+\bibitem[{Glynn et~al.(2019)Glynn, Tokdar, Howard and
+  Banks}]{glynn2018bayesian}
+Glynn, C., Tokdar, S.~T., Howard, B. and Banks, D.~L. (2019) Bayesian analysis
+  of dynamic linear topic models.
+\newblock \textit{Bayesian Anal.}, \textbf{14}, 53--80.
+\newblock \urlprefix\url{https://doi.org/10.1214/18-BA1100}.
+
+\bibitem[{Griffin and Brown(2010)}]{griffin2010}
+Griffin, J.~E. and Brown, P.~J. (2010) Inference with normal-gamma prior
+  distributions in regression problems.
+\newblock \textit{Bayesian Anal.}, \textbf{5}, 171--188.
+\newblock \urlprefix\url{https://doi.org/10.1214/10-BA507}.
+
+\bibitem[{Hartman(1976)}]{hartman1976completely}
+Hartman, P. (1976) Completely monotone families of solutions of $ n $-th order
+  linear differential equations and infinitely divisible distributions.
+\newblock \textit{Annali della Scuola Normale Superiore di Pisa-Classe di
+  Scienze}, \textbf{3}, 267--287.
+
+\bibitem[{Holmes and Held(2006)}]{holmes2006}
+Holmes, C.~C. and Held, L. (2006) Bayesian auxiliary variable models for binary
+  and multinomial regression.
+\newblock \textit{Bayesian Analysis}, \textbf{1}, 145--168.
+
+\bibitem[{Linderman et~al.(2015)Linderman, Johnson and
+  Adams}]{linderman2015dependent}
+Linderman, S., Johnson, M. and Adams, R.~P. (2015) Dependent multinomial models
+  made easy: Stick-breaking with the p{\'o}lya-gamma augmentation.
+\newblock In \textit{Advances in Neural Information Processing Systems},
+  3456--3464.
+
+\bibitem[{Mallick et~al.(2005)Mallick, Ghosh and Ghosh}]{mallick2005bayesian}
+Mallick, B.~K., Ghosh, D. and Ghosh, M. (2005) Bayesian classification of
+  tumours by using gene expression data.
+\newblock \textit{Journal of the Royal Statistical Society: Series B
+  (Statistical Methodology)}, \textbf{67}, 219--234.
+
+\bibitem[{Miller(2018)}]{miller2018fast}
+Miller, J.~W. (2018) Fast and accurate approximation of the full conditional
+  for {G}amma shape parameters.
+\newblock \textit{arXiv:1802.01610}.
+
+\bibitem[{Minka(2000)}]{minka2000estimating}
+Minka, T. (2000) Estimating a {D}irichlet distribution.
+\newblock \textit{Technical report, MIT}.
+
+\bibitem[{Polson and Scott(2013)}]{polson2013data}
+Polson, N.~G. and Scott, J.~G. (2013) Data augmentation for {N}on-{G}aussian
+  regression models using variance-mean mixtures.
+\newblock \textit{Biometrika}, \textbf{100}, 459--471.
+
+\bibitem[{Polson et~al.(2013)Polson, Scott and Windle}]{polson2013bayesian}
+Polson, N.~G., Scott, J.~G. and Windle, J. (2013) Bayesian inference for
+  logistic models using {P}{\'o}lya--{G}amma latent variables.
+\newblock \textit{Journal of the American Statistical Association},
+  \textbf{108}, 1339--1349.
+
+\bibitem[{Polson and Scott(2011)}]{polson2011data}
+Polson, N.~G. and Scott, S.~L. (2011) Data augmentation for {S}upport {V}ector
+  {M}achines.
+\newblock \textit{Bayesian Analysis}, \textbf{6}, 1--23.
+
+\bibitem[{Rossell et~al.(2009)}]{rossell2009gaga}
+Rossell, D. et~al. (2009) {G}a{G}a: a parsimonious and flexible model for
+  differential expression analysis.
+\newblock \textit{The Annals of Applied Statistics}, \textbf{3}, 1035--1051.
+
+\bibitem[{Roynette and Yor(2005)}]{roynette2005couples}
+Roynette, B. and Yor, M. (2005) Couples de {W}ald ind{\'e}finiment divisibles.
+  {E}xemples li{\'e}s {\`a} la fonction gamma d'{E}uler et {\`a} la fonction
+  zeta de {R}iemann.
+\newblock \textit{Annales de l'institut Fourier}, \textbf{55}, 1219--1284.
+
+\bibitem[{West(1987)}]{west1987scale}
+West, M. (1987) On scale mixtures of {N}ormal distributions.
+\newblock \textit{Biometrika}, \textbf{74}, 646--648.
+
+\bibitem[{West(1992)}]{west1992hyperparameter}
+--- (1992) Hyperparameter estimation in {D}irichlet process mixture models.
+\newblock \textit{Working paper, Duke University}.
+
+\bibitem[{Windle et~al.(2014)Windle, Polson and Scott}]{windle2014sampling}
+Windle, J., Polson, N.~G. and Scott, J.~G. (2014) Sampling {P}olya-{G}amma
+  random variates: alternate and approximate techniques.
+\newblock \textit{arXiv:1405.0506}.
+
+\bibitem[{Zhou et~al.(2012)Zhou, Hannah, Dunson and Carin}]{zhou2012beta}
+Zhou, M., Hannah, L., Dunson, D. and Carin, L. (2012) Beta-negative binomial
+  process and poisson factor analysis.
+\newblock In \textit{Artificial Intelligence and Statistics}.
+
+\end{thebibliography}

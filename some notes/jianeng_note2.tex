@@ -1,0 +1,69 @@
+\documentclass[11pt, oneside]{article} 
+\usepackage{geometry}
+\geometry{letterpaper} 
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\newcommand{\dd}{\mathbf{d}}
+
+\begin{document}
+Let $w_k \sim R\Gamma(\frac{3}{2}, \beta_k)$, where $R\Gamma$ denotes reciprocal (or inverse) gamma. It has density 
+$$
+f_{w_k}(y) = \frac{\beta_k^{\frac{3}{2}}}{\Gamma(\frac{3}{2})}  y^{-\frac{5}{2}} e^{-\beta_k y^{-1}}, \; (y>0)
+$$
+
+With $\beta_k = \frac{1}{4d_k^2}$, 
+\begin{align}
+E(e^{-t^2 w_k}) &= \int_0^\infty e^{-t^2 y}  \frac{\beta_k^{\frac{3}{2}}}{\Gamma(\frac{3}{2})}  y^{-\frac{5}{2}} e^{-\beta_k y^{-1}} dy\\
+&=  \left( 1 + \frac{|t|}{d_k} \right) e^{-\frac{|t|}{d_k}}.
+\end{align}
+Therefore, 
+\begin{equation}\label{pig_d}
+w|\dd \overset{d}{=} \sum_{k=1}^\infty R\Gamma\left(\frac{3}{2}, \frac{1}{4d_k^2}\right)
+ \Longrightarrow E_{w|\dd}(e^{-t^2 w}) = \prod_{k=1}^\infty \left( 1 + \frac{|t|}{d_k} \right) e^{-\frac{|t|}{d_k}}.
+\end{equation}
+We can also write as 
+$$
+w |\dd \overset{d}{=}  \sum_{k=1}^\infty GIG\left(-\frac{3}{2}, \frac{1}{\sqrt{2}d_k}, 0\right).
+$$ 
+Here $GIG$ denotes generalized inverse Gaussian. 
+
+Now we consider the extension $PIG(\dd, c)$ with the density
+$$
+p_{w|\dd, c} (y) \propto \exp\left( -\frac{c^2}{2} y \right) p_{w|\dd}(y)
+$$
+Using (\ref{pig_d}), we calculate that 
+\begin{equation}
+E_{w|\dd, c}(e^{-t^2 w}) = \prod_{k=1}^\infty \left( \frac{d_k + \sqrt{t^2 + \tilde{c}^2}}{d_k + \tilde{c}} \right) e^{-\frac{\sqrt{t^2 + \tilde{c}^2}}{d_k}} e^{\frac{\tilde c}{d_k}} 
+\end{equation}
+where $\tilde{c} = |c|/\sqrt{2}$. We now show that 
+$$
+PIG(\dd, c) \overset{d}{=} \sum_{k=1}^\infty GIG\left(-\frac{3}{2}, \frac{1}{\sqrt{2}d_k}, |c|\right).
+$$
+It suffices to show 
+$$
+E(e^{-t^2 Y_k}) = \left( \frac{d_k + \sqrt{t^2 + \tilde{c}^2}}{d_k + \tilde{c}} \right) e^{-\frac{\sqrt{t^2 + \tilde{c}^2}}{d_k}} e^{\frac{\tilde c}{d_k}} 
+$$
+where $Y_k \sim GIG\left(-\frac{3}{2}, \frac{1}{\sqrt{2}d_k}, |c|\right)$ has density
+$$
+p_{d_k, c}(y) = m_k y^{-\frac{5}{2}} \exp\left(-\frac{1}{4d_k^2} y^{-1} -\tilde{c}^2 y\right)
+$$ with $$m(k, \tilde{c}) = \frac{1}{\Gamma\left(\frac{3}{2}\right)}\frac{ (2d_k)^{-3}}{\tilde{c} d_k^{-1} +1}e^{\tilde{c} d_k^{-1}}.$$ This is via simple calculation 
+\begin{align*}
+\int_0^\infty e^{-t^2 y} p_{d_k, c}(y) dy &= m(k, \tilde{c}) \int_0^\infty  y^{-\frac{5}{2}} \exp\left(-\frac{1}{4d_k^2} y^{-1} -(t^2 + \tilde{c}^2) y\right) dy\\
+&= \frac{m(k, \tilde{c})}{m(k, \sqrt{t^2 + \tilde{c}^2})}\\
+&= \frac{(\sqrt{t^2 + \tilde{c}^2} d_k^{-1} +1) \exp(\sqrt{t^2 + \tilde{c}^2} d_k^{-1})}{(\tilde{c} d_k^{-1} +1)\exp(\tilde{c} d_k^{-1})}\\
+&=  \left( \frac{d_k + \sqrt{t^2 + \tilde{c}^2}}{d_k + \tilde{c}} \right) e^{-\frac{\sqrt{t^2 + \tilde{c}^2}}{d_k}} e^{\frac{\tilde c}{d_k}}  
+\end{align*}
+
+
+\section{Expectation}
+Let $X\sim PIG(\dd, c) \overset{d}{=} \sum_{k=1}^\infty GIG\left(-\frac{3}{2}, \frac{1}{\sqrt{2}k}, |c|\right)$. We now calculate the expectation of $X$.
+\begin{align*}
+E(X) &= \sum_{k=1}^\infty \frac{1}{\sqrt{2}|c|k}\frac{K_{-\frac{1}{2}}(|c|/\sqrt{2k^2})}{K_{-\frac{3}{2}}(|c|/\sqrt{2k^2})}\\
+&= \sum_{k=1}^\infty \frac{1}{\sqrt{2}|c|k} \frac{|c|/\sqrt{2k^2}}{1 + |c|/\sqrt{2k^2}} \\
+&= \sum_{k=1}^\infty \frac{1}{2k^2 + \sqrt{2}k|c|} \\
+&= \frac{\gamma + \psi(|c|/\sqrt{2} + 1)}{\sqrt{2}|c|}
+\end{align*}
+where $K_v$ is the modified Bessel function of the second kind. $\psi$ is digamma function.
+
+\end{document}	

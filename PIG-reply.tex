@@ -1,0 +1,68 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath,amssymb,calc,color}
+\usepackage{graphicx}
+\usepackage{amsthm}%
+\usepackage{natbib}
+\usepackage{bm}
+%\usepackage{macros}
+\usepackage[latin1]{inputenc}
+\makeatletter
+
+\newdimen\breite
+\setlength{\breite}{29pt}
+\newdimen\hohe
+\setlength{\hohe}{26pt}
+
+\addtolength{\textwidth}{4\breite}
+\addtolength{\oddsidemargin}{-2\breite}
+\addtolength{\evensidemargin}{-2\breite}
+\addtolength{\textheight}{4\hohe}
+\addtolength{\topmargin}{-1.95\hohe}
+
+
+\renewcommand\baselinestretch{1.2}%{1.82}
+
+\def\ul{\bgroup\smallskip
+\parindent-15pt
+\leftskip=15pt}
+\def\endul{\vskip1sp\smallskip\egroup}
+
+\definecolor{DarkBlue}{rgb}{0,0,0.5451}
+
+\newcommand{\answer}[1]{\par\smallskip\noindent{\color{DarkBlue}\it#1}\par\medskip}
+\newcommand{\question}[1]{\par\smallskip\noindent$\leadsto$ {\color{red}\sc#1}\par\medskip}
+\newcommand{\bs}{\bigskip}
+\setcounter{section}1
+\renewcommand\thesubsection   {{\bf\@arabic\c@subsection}}
+
+
+
+
+\begin{document}
+\parindent=0pt
+
+
+\newpage
+\begin{enumerate}
+\item Page 7. Can we make a statement like: If $w \sim PG(b,c)$ then $w \sim PIG(0,\sqrt{\frac{2}{2\pi^2(k-1/2)^2 + c^2/2}})$?
+\answer{PG is PIG only if $b = -\frac{3}{2}$ and $d_k = \infty$ for all $k$.}
+
+\item Page 7. Are these just two examples of ratios of gamma functions? I don't immediately see the connection between equations 9 and 10. Am I missing something? I do think it's a good idea to connect the ratio of gamma functions to the scale mixture representation early on.
+\answer{Maybe we should delete this remark.}
+
+\item Page 8. Is this only true for $a = 1$ or does it generalize to other values?
+\answer{The result $$
+\frac{\Gamma(a)}{\Gamma(a+t)} e^{\psi(a)t} = E_{w|a}\left[ e^{-\frac{1}{2}t^2 w}\right]$$ holds for all $a>0$ and $t\geq 0$. $\psi(\cdot)$ is digamma function.}
+
+\item Page 11. I think we still need a proof of the full conditional for $w_{mk}$ here.
+\answer{
+By Equation 19, when condition on all other variables, the density of $w_{mk}$ is proportional to 
+$$
+e^{-(n_{mk}+\alpha_k-1)^2w_{mk}}p(w_{mk})
+$$
+where $p(\cdot)$ is the density of $PIG(\bm{d},0)$. Then compare the above expression with Equation 6, we see that the conditional distribution of $w_{mk}$ is $PIG(\bm{d}, \sqrt{2(n_{mk}+\alpha_k-1)^2})$.}
+
+\end{enumerate}
+
+
+\end{document}

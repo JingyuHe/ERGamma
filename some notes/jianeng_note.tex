@@ -1,0 +1,158 @@
+\documentclass[11pt, oneside]{article} 
+\usepackage{geometry}
+\geometry{letterpaper} 
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+
+
+\begin{document}
+\section{Theory}
+The following 2 results are linked
+\begin{itemize}
+\item 
+Roynette and Yor (2005), page 1256, IV.9:\\
+There exists a random variable $H$ infinitely divisible, such that its Laplace transform has representation:
+\begin{equation}\label{Yor}
+E(e^{-sH}) = \frac{\Gamma(\alpha)}{\Gamma(\alpha + \sqrt{2s})} e^{\sqrt{2s}\psi(\alpha)}
+\end{equation}
+where $\psi(\alpha) = \Gamma'(\alpha)/\Gamma(\alpha)$. $\alpha > 0.$ Note that $H$ is indexed by its parameter $\alpha$, namely $H_\alpha$.\\
+
+%Special case: Hartman (1976), There exists a random variable $H$,
+%\begin{equation}
+%E(e^{-sH}) = \frac{1}{\Gamma(1 + \sqrt{s})}e^{c\sqrt{s}}
+%\end{equation}
+%where $c \leq \log(0.56)$.
+
+\item 
+Bondesson (1982):\\
+Given the Laplace transform of an infinitely divisible distribution, $E(e^{-sH})$, we can sample from it approximately by a truncated shot-noise process. 
+\end{itemize}
+
+\subsection{From Roynette and Yor to Bondesson}
+To sample from $H$, the procedure of Bondesson requires its Thorin measure. Suppose $H$ is an Exponential Reciprocal Gamma (ERG) variable if and only if its Laplace transform has representation:
+\begin{equation}\label{def}
+E(e^{-sH}) = \frac{\Gamma(a)}{\Gamma(a + b\sqrt{s})} e^{c\sqrt{s}}
+\end{equation}
+where $a, b, c$ are parameters and satisfy some constraint. Eqn. (\ref{Yor}) is a special case.  Then we can get its Thorin measure by making use of Roynette and Yor (2005), page 1257, IV.10.
+\section{Application}
+Suppose in some model, we are interested in the parameter $\beta$, whose likelihood has a form like 
+\begin{equation}
+\beta | x \propto \frac{1}{\Gamma(a(x) + b(x) \beta)}e^{c(x)\beta}
+\end{equation}
+where $x$ is data. Then transform $\tilde\beta = \beta^2$, 
+\begin{equation}
+\tilde\beta | x \propto \frac{1}{\Gamma(a(x) + b(x) \sqrt{\tilde\beta})}e^{c(x)\sqrt{\tilde\beta} - \log(\sqrt{\tilde\beta})}
+\end{equation}
+We introduce a latent variable $H$ (its parameters being functions of $x$), whose Laplace transform is 
+\begin{equation}
+E(e^{-\tilde \beta H}) = \frac{\Gamma(a(x))}{\Gamma(a(x) + b(x) \sqrt{\tilde\beta})}e^{\tilde c(x)\sqrt{\tilde\beta}}
+\end{equation}
+($\tilde c(x)$ might have some constraint together with $a(x)$ and $b(x)$, it's not necessarily equal to $c(x)$). This form is the same as  Eqn. (\ref{def}). Therefore, we can sample $H$ by Bondesson.
+\begin{align}
+\tilde\beta | x &\propto e^{[c(x)-\tilde c(x)]\sqrt{\tilde\beta}- \log\left(\sqrt{\tilde\beta}\right)} E(e^{-\tilde \beta H})\\
+&= e^{[c(x)-\tilde c(x)]\sqrt{\tilde\beta}- \log\left(\sqrt{\tilde\beta}\right)} \int_0^\infty e^{-\tilde \beta h} p_H(h) dh.
+\end{align}
+Thus, the conditional posterior of $\tilde\beta$ given $h$ is 
+\begin{equation}
+\tilde\beta | x, h \propto p(\tilde \beta) e^{[c(x)-\tilde c(x)]\sqrt{\tilde\beta}- \log\left(\sqrt{\tilde\beta}\right)} e^{-\tilde \beta h}.
+\end{equation}
+Back to $\beta$, its conditional posterior is 
+\begin{equation}
+\beta | x, h \propto p( \beta) e^{[c(x)-\tilde c(x)]\beta} e^{-\beta^2 h}.
+\end{equation}
+Let the prior of $\beta$ be Gaussian, then its conditional posterior is also Gaussian.
+
+\subsection{Sample from $\beta$ posterior}
+\begin{align}
+h | x &\sim ERG, \qquad \text{sample $h$ by Bondesson}\\
+\beta | h, x &\sim Gaussian
+\end{align}
+
+\section{Summary of Bondesson}
+(The notation of this section is different than previous ones).
+\subsection{Basic Result}
+Suppose $X = \sum_{i=1}^\infty Z(T_i)$ where  $\left\{Z(u): u>0\right\}$ is a family of non-negative independent random variables, with density $H(y; u)$.  $0 \leq T_1 \leq T_2 \leq ...$ are points of $Poisson(\lambda)$ process. Then the Laplace transforms of $X$ and $Z(u)$ have relation:
+\begin{equation}
+E(e^{-sX}) = \exp\left\{\lambda \int_0^\infty \left(E(e^{-sZ(u)}) -1\right) du \right\}
+\end{equation}
+Note that by Changing the order of integration,
+\begin{align}
+\exp\left\{\lambda \int_0^\infty \left(E(e^{-sZ(u)}) -1\right) du \right\} &:= \exp\left\{\lambda \int_0^\infty \left(\int_0^\infty e^{-sy}H(y; u)dy  -1\right) du \right\}\\
+&= \exp\left\{\lambda \int_0^\infty\int_0^\infty  \left(e^{-sy}-1 \right)H(y; u) dy  du \right\}\\
+&= \exp\left\{\lambda \int_0^\infty\left(e^{-sy}-1 \right)\left( \int_0^\infty  H(y; u) du \right) dy \right\}
+\end{align}
+Writting
+\begin{equation}\label{levy}
+\lambda \left(\int_0^\infty  H(y; u) du\right) dy := N(dy), 
+\end{equation}
+we have
+\begin{equation}
+E(e^{-sX}) = \exp\left\{  \int_0^\infty\left(e^{-sy}-1 \right)  N(dy)\right\},
+\end{equation}
+then $N(dy)$ is called the Levy measure of the infinitely divisible random variable $X$.
+
+\subsection{Simulate $H(y; u)$}
+Suppose we are given $N(dy)$, we are now interested in the form $$H(y; u) = H\left(\frac{y}{g(u)}\right)$$
+where $H$ is a density of $[0,\infty)$ and $g\geq 0$. If so, 
+$$
+Z(T_i) = g(T_i)V_i
+$$
+where $V_i$ are iid from $H$.\\
+
+Integrate equation (\ref{levy}) on $(x, \infty)$, we get
+\begin{align}
+\lambda \int_x^\infty \left(\int_0^\infty  H(y; u) du\right) dy &= \int_x^\infty N(dy)\\
+\lambda  \int_0^\infty \left(\int_x^\infty  H(dy; u) \right) du &= \int_x^\infty N(dy)\\
+\lambda  \int_0^\infty \bar H(x; u) du &= \bar N(x)
+\end{align}
+where $\bar H(x; u) = 1 - \int_0^x H(dy; u) dy$ and $\bar N(x) = 1- \int_0^x N(dy)$. Since $\bar H(x; u) = \bar H\left(\frac{x}{g(u)}\right)$,
+\begin{equation}\label{g}
+\lambda \int_0^\infty \bar H\left(\frac{x}{g(u)}\right) du = \bar N(x)
+\end{equation}
+
+\subsection{Case I: $H \equiv 1$}
+Let $v = g(u)$, then
+\begin{equation}
+\lambda \int_0^\infty\bar H(x/v)g^{-1}(dv) = \bar N(x)
+\end{equation}
+Thus 
+$$
+Z(T_i) = g(T_i) = \sup\left\{x: \int_x^\infty N(dy) \geq \lambda T_i\right\}
+$$
+using the fact that 
+$$
+\lambda \int_0^\infty g^{-1}(dv)  = \int_x^\infty N(dy).
+$$
+\subsection{Case II: $g(u) = e^{-u}$}
+Let $y = x/g(u) = xe^u$, then  Equation (\ref{g}) becomes
+\begin{equation}
+\lambda \int_x^\infty y^{-1}\bar H(y) dy= \bar N(x)
+\end{equation}
+In other words,
+$$
+N(dy) = \lambda y^{-1}\bar H(y) dy
+$$
+Furthermore, if there exists a measure $U$, s.t. 
+$$
+\bar H(y) = \int_0^\infty e^{-\tau y} M(d \tau), \qquad U(d \tau) = \lambda  M(d \tau),
+$$
+then 
+\begin{equation}
+N(dy) = \frac{dy}{y}\int_0^\infty e^{-\tau y} U(d \tau)
+\end{equation}
+Therefore $U(d\tau)$ is the Thorin measure of $X$, and $X$ is GGC.
+\subsection{Case II continued: Simulate from GGC given the Thorin measure}
+$$
+X = \sum_{i=1}^\infty e^{-T_i} \frac{W_i}{\tau_i}
+$$
+where $W_i$ are iid $\Gamma(1,1)$, and $\tau_i$ are iid from $U$ (normalized to 1).
+\subsection{Method 2a}
+In practice, we truncate the series, i.e. sum over all $T_i\leq T$.  Then 
+\begin{itemize}
+\item tail $e_T$ is independent of $X_T$ and admits normal approximation. ($\mu$ and $\sigma$ is on page 863, bottom). Can also approximate by $\mu$ if normal approximation is not valid.
+
+\item $T_i = TU_i$ where $U_i$ are iid Uniform[0, 1] and $i = 1, 2, ...\nu$ and $\nu \sim Poisson(\lambda T)$.
+\end{itemize}
+\end{document}
+	

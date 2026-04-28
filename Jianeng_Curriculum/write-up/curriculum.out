@@ -1,0 +1,14 @@
+\BOOKMARK [1][-]{section.1}{Introduction}{}% 1
+\BOOKMARK [1][-]{section.2}{The P\363lya-Inverse Gamma \(P-IG\) Distribution Class}{}% 2
+\BOOKMARK [2][-]{subsection.2.1}{The P-IG\(0\) distribution}{section.2}% 3
+\BOOKMARK [2][-]{subsection.2.2}{The General P-IG\(c\) Class}{section.2}% 4
+\BOOKMARK [1][-]{section.3}{Inferring concentration parameters in multinomial-Dirichlet models}{}% 5
+\BOOKMARK [2][-]{subsection.3.1}{A hierarchical multinomial-Dirichlet model class}{section.3}% 6
+\BOOKMARK [2][-]{subsection.3.2}{Data augmentation strategies with P-IG auxiliary variables}{section.3}% 7
+\BOOKMARK [1][-]{section.4}{Shape Inference of Gamma}{}% 8
+\BOOKMARK [1][-]{section.5}{Application: Opioid and Prescription Drug Crisis}{}% 9
+\BOOKMARK [1][-]{section.6}{Discussion}{}% 10
+\BOOKMARK [1][-]{appendix.A}{Proof of Lemma 1}{}% 11
+\BOOKMARK [1][-]{appendix.B}{Proof of Theorem 1}{}% 12
+\BOOKMARK [1][-]{appendix.C}{Proof of Theorem 2}{}% 13
+\BOOKMARK [1][-]{appendix.D}{Sampling from Conditional Posterior of }{}% 14

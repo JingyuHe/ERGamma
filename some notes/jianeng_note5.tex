@@ -1,0 +1,122 @@
+\documentclass[11pt, oneside]{article} 
+\usepackage{geometry}
+\geometry{letterpaper} 
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{bm}
+\usepackage{graphicx}
+\usepackage{booktabs}
+
+\begin{document}
+\section{Gamma Shape Inference}
+Damsleth(1975) discussed two conjugate priors for the shape parameter in Gamma distribution. They are called gamcon distributions of type I and type II. Type I assumes the scale parameter in Gamma distribution is known, while type II doesn't. In Section 4 of PIG paper, we used type I gamcon prior (with a different parametrization) for the Gamma shape inference problem. In this note, we focus on type II gamcon prior to address the case where the Gamma scale (or rate) is also unknown.  
+
+\section{Posterior}
+We consider the hierarchical model
+\begin{align*}
+Y | \alpha, \beta &\sim \Gamma(\alpha, \beta),\\
+\beta | \alpha &\sim \Gamma(\delta \alpha+1, \delta\eta),\\
+\alpha &\sim \xi_2(\eta/\mu, \delta).
+\end{align*} 
+Here $\xi_2$ is gamcon distribution of type II. $\eta>\mu>0, \delta > 0$. Let $y_1, y_2, ..., y_n$ be independently and identically distributed Gamma random variables with shape parameter $\alpha$ and rate parameter $\beta$. The likelihood is 
+\begin{align}
+f(y_1, y_2, ..., y_n | \alpha, \beta) &= \prod_{i=1}^n \frac{\beta^\alpha}{\Gamma(\alpha)} y_i^{\alpha - 1} e^{-\beta y_i} \\
+&\propto \frac{(y_g\beta)^{n\alpha}}{\Gamma(\alpha)^{n}} e^{-ny_g\beta}
+\end{align}
+where $y_g$ is the geometrical mean of $y$, $y_g = \left(\prod_{i=1}^{n} y_i\right)^{1/n}$.
+
+With the prior specified above, the marginal posterior distribution of $\alpha$ is calculated as 
+\begin{align}
+p(\alpha | y_1, y_2, ..., y_n) &= \frac{\int_0^\infty f(y_1, y_2, ..., y_n | \alpha, \beta)p(\beta|\alpha)p(\alpha) d\beta }{\int_0^\infty\int_0^\infty f(y_1, y_2, ..., y_n | \alpha, \beta)p(\beta|\alpha)p(\alpha) d\beta d\alpha}
+\end{align} 
+where
+\begin{align}
+p(\beta|\alpha) &= \frac{(\delta\eta)^{\delta\alpha + 1}}{\Gamma(\alpha\delta + 1)}\beta^{\alpha\delta} e^{-\delta\eta\beta},\\
+p(\alpha) &= C\cdot \frac{\Gamma(\delta\alpha + 1)}{\Gamma(\alpha)^\delta} (\delta\eta/\mu)^{-\delta\alpha}.
+\end{align}
+Theorem 2 in Damsleth 1975 states that 
+\begin{equation}
+\alpha | y_1, y_2, ..., y_n \sim \xi_2(\eta'/\mu', \delta')
+\end{equation} 
+with
+\begin{align*}
+\delta' &= \delta + n\\
+\eta' &= \frac{\delta}{\delta + n}\eta + \frac{n}{\delta + n} y_a, \\
+\mu' &= \mu^{\frac{\delta}{\delta + n}}\cdot y_g^{\frac{n}{\delta + n}}.
+\end{align*}
+and $y_a$ is the arithmetical mean of $y$, $y_a = \frac{1}{n}\sum_{i=1}^{n} y_i$.
+
+\section{Sampling from $\xi_2$ when $\delta \in \mathbb{N}^+$}
+In this section we develop the Gibbs sampler for a general gamcon distribution of type II, using data augmentation strategy. Suppose $x \sim \xi_2(x; \mu, \delta)$ and $\delta$ is a positive integer. Then
+\begin{align}
+p(x|\mu, \delta) &= C\cdot \frac{\Gamma(\delta x + 1)}{\Gamma(x)^\delta} (\delta\mu)^{-\delta x} \\
+&= C \int x^\delta \exp\left(-\tau-\left(\sum_{i=1}^{\delta} \omega_i\right) x^2 + \delta(\gamma-\log(\delta\mu/\tau)) x\right) \prod_{i=1}^\delta p^{ERG}(\omega_i) d\tau d\bm{\omega}
+\end{align}
+where $p^{ERG}$ is the density of ERG(0) distribution. Hence, if we introduce the latent variables $\tau$ and $\omega_1, \omega_2, ..., \omega_{\delta}$, then  
+\begin{align}
+\tau | x, \bm{\omega} &\sim \Gamma(\delta x +1, 1) \\
+\omega_1, \omega_2, ..., \omega_\delta | x, \tau &\sim_{i.i.d} ERG(x)\\
+x | \tau, \bm{\omega} &\sim H\left(\delta+1, \sum_{i=1}^\delta \omega_i, \delta\left(\gamma - \log(\delta\mu/\tau)\right)\right)
+\end{align}
+
+\subsection{Simulated Example}
+Here we replicate Damsleth's example of no prior information with sample size $n=30$. Putting $\delta = 0$ so that the ``prior sample size" is 0, the posterior parameters are 
+\begin{align*}
+\delta' &= n\\
+\eta' &= y_a\\
+\mu' &= y_g
+\end{align*}
+which means $\alpha | y_1, y_2, ..., y_n \sim \xi_2(y_a/y_g, n)$. Instead of actually generating Gamma random variables, we directly use the statistics $x_a = 5.09$ and $x_g = 4.26$ given by Table 2 of Damsleth (1975). The posterior samples are shown in Figure \ref{fig:gammashapeunknownscale}. In Table \ref{tab:my-table}, We also compare the sample moments versus the theoretical moments calculated by numerical integration ( given in Table 3, Damsleth 1975).
+\begin{figure}
+	\centering
+	\includegraphics[width=0.75\linewidth]{gamma_shape_unknown_scale}
+	\caption{Histogram of Posterior Samples}
+	\label{fig:gammashapeunknownscale}
+\end{figure}
+
+
+\begin{table}[]
+	\centering
+	\begin{tabular}{@{}lcccc@{}}
+		\toprule
+		& Mean   & Variance    & Skewness & Kurtosis  \\ \midrule
+		Numerical Integration & 3.252 & 0.585 & 0.490   & 3.361 \\
+		Posterior Sampling    & 3.410 & 0.684  & 0.397    & 3.360 \\ \bottomrule
+	\end{tabular}
+	\caption{Posterior Moments}
+\label{tab:my-table}
+\end{table}
+
+\section{EM}
+With i.i.d. observations $\bm{Y}:=\{y_1, y_2, ..., y_n\}$ from the model in Section 2, the Expectation–maximization (EM) algorithm for computing the posterior mode of shape parameter is as follows:
+\begin{itemize}
+	\item Expectation step:
+	\begin{align*}
+	&Q(\alpha | \alpha^{(t)}) \\
+	&:= E_{\bm{\theta} | \bm{Y}, \alpha^{(t)}} \left[\log L(\alpha; \bm{\theta, Y})\right] \\
+	&= c + E_{\bm{\theta} | \bm{Y}, \alpha^{(t)}}\left[\delta'\log \alpha - \tau - \left(\sum_{i=1}^{\delta'} \omega_i\right) \alpha^2 + \delta'(\gamma-\log\delta'\eta'/\mu' + \log\tau) \alpha + \sum_{i=1}^{\delta'} \log p^{ERG}(\omega_i)\right]
+	\end{align*}
+where $\bm\theta := (\tau, \bm{\omega})$. As
+\begin{align*}
+E_{\tau| \bm{Y}, \alpha^{(t)}}[\log\tau] &= \psi(\delta'\alpha^{(t)} + 1) \\
+E_{\tau| \bm{Y}, \alpha^{(t)}}[\tau] &= \delta'\alpha^{(t)} + 1\\
+E_{\bm{\omega} | \bm{Y}, \alpha^{(t)}}\left[\sum_{i=1}^{\delta'} \omega_i\right] &= \frac{\delta'}{2\alpha^{(t)}}\left(\gamma + \psi(\alpha^{(t)} + 1)\right)\\
+E_{\bm{\omega} | \bm{Y}, \alpha^{(t)}}\left[\sum_{i=1}^{\delta'} \log p^{ERG}(\omega_i) \omega_i\right] &= c'(\alpha^{(t)},\delta')
+\end{align*}
+where $\psi(\cdot)$ is the digamma function. Therefore,
+\begin{align}
+Q(\alpha | \alpha^{(t)})
+&= c + \kappa_1 \log\alpha - \kappa_2 \alpha^2 + \kappa_3 \alpha \\
+\kappa_1 &:= \delta' > 0\\
+\kappa_2 &:=  \frac{\delta'\left(\gamma + \psi(\alpha^{(t)} + 1)\right)}{2\alpha^{(t)}} > 0\\
+\kappa_3 &:= \delta'\left(\gamma-\log\delta'\eta'/\mu' + \psi(\delta'\alpha^{(t)} + 1)\right)
+\end{align}
+	\item Maximization step:
+	\begin{align}
+	\alpha^{(t+1)} &:= \arg\max_\alpha Q(\alpha | \alpha^{(t)}) \\
+	&= \frac{\kappa_3 + \sqrt{\kappa_3^2 + 8\kappa_1\kappa_2}}{4\kappa_2}
+	\end{align}
+
+\end{itemize}
+\end{document}	

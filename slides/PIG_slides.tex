@@ -1,0 +1,236 @@
+\documentclass[10pt]{beamer}
+
+\usetheme{metropolis}
+\usepackage{adjustbox}
+\usepackage{fancyvrb}
+\usepackage{appendixnumberbeamer}
+
+\usepackage{booktabs}
+\usepackage[scale=2]{ccicons}
+
+\usepackage{pgfplots}
+\usepgfplotslibrary{dateplot}
+\usepackage{graphicx}
+
+\usepackage{xspace}
+\newcommand{\themename}{\textbf{\textsc{metropolis}}\xspace}
+\usepackage{tikz}
+\usetikzlibrary{arrows}
+\usetikzlibrary{positioning}
+\usetikzlibrary{shapes.arrows}
+\newdimen\nodeDist
+\nodeDist=25mm
+\usepackage{pgfplots}
+
+\newcommand\Wider[2][3em]{%
+\makebox[\linewidth][c]{%
+  \begin{minipage}{\dimexpr\textwidth+#1\relax}
+  \raggedright#2
+  \end{minipage}%
+  }%
+}
+
+\tikzset{
+    myarrow/.style={
+        draw,
+        fill=orange,
+        single arrow,
+        minimum height=3.5ex,
+        single arrow head extend=1ex
+    }
+}
+\newcommand{\arrowrt}{%
+\tikz [baseline=-0.5ex]{\node [myarrow,rotate=0] {};}
+}
+
+\usepackage{amsthm}
+\usepackage{thmtools}
+\theoremstyle{definition}
+\newtheorem{myexp}{Example}
+
+\newcommand{\iid}{\overset{iid}{\sim}} 
+\newcommand{\approxsim}{\overset{approx}{\sim}} 
+\newcommand{\poislik}[2]{\frac{\exp[-{#2}] [{#2}]^{#1} }{#1!}}
+%\newcommand{\x}{\mathbf{x}}
+\newcommand{\pnb}{p_{\mathit{NB}}}
+\newcommand{\pp}{p_{\mathit{P}}}
+\newcommand{\pzi}{p_{\mathit{ZI}}}
+\newcommand{\ph}{p_{\mathit{H}}}
+\newcommand{\F}{\Phi}
+\newcommand{\ind}[1]{\mathds{1}(#1)}%
+
+
+
+\newcommand{\X}{\mathbf{X}}
+\newcommand{\Y}{\tilde{Y}}
+\newcommand{\tepsilon}{\tilde{\epsilon}}
+\newcommand{\blambda}{\mathbf{\lambda}}
+\newcommand{\Z}{\mathbf{Z}}
+\newcommand{\br}{\mathbf{r}}
+\newcommand{\bv}{\mathbf{b}}
+\newcommand{\f}{\mathbf{f}}
+\newcommand{\btheta}{\boldsymbol{\theta}}
+\newcommand{\epsy}{\epsilon}
+\newcommand{\epsz}{\nu}
+
+\newcommand{\z}{\mathrm{z}}
+\newcommand{\bSigma}{\boldsymbol{\Sigma}}
+
+\newcommand{\probit}{\mbox{probit}}
+\newcommand{\hiw}{\mbox{{\small\textsc{HIW}}}}
+\newcommand{\iw}{\mbox{{\small\textsc{IW}}}}
+\newcommand{\N}{\mbox{{\small\textsc{N}}}}
+\newcommand{\T}{\mbox{{\small\textsc{T}}}}
+\newcommand{\C}{\mbox{{\small\textsc{C}}}}
+\newcommand{\Ga}{\mbox{{\small\textsc{Ga}}}}
+\newcommand{\IG}{\mbox{{\small\textsc{IG}}}}
+\newcommand{\Be}{\mbox{{\small\textsc{Be}}}}
+\newcommand{\Ber}{\mbox{{\small\textsc{Ber}}}}
+\newcommand{\dd}{\mbox{d}}
+\newcommand{\E}{\mbox{E}}
+\newcommand{\V}{\mathbf{V}}
+\newcommand{\I}{\mathbf{I}}
+\newcommand{\Tau}{\mathrm{T}}
+\newcommand{\x}{\mathrm{x}}
+
+
+\newcommand{\w}{\mathrm{w}}
+\newcommand{\y}{\mathrm{y}}
+\newcommand{\res}{\mathrm{r}}
+
+
+
+
+%\newcommand{\f}{f}
+\newcommand{\mleaf}{\phi}
+\newcommand{\m}{m}
+%\newcommand{\G}{Gamma}
+
+
+\newcommand{\indep}{\!\perp\!\!\!\perp}
+\newcommand{\nindep}{\not\indep}
+
+\newcommand{\sumi}[1]{\sum_{h = 1}^{\MakeLowercase{#1}}}
+\newcommand{\beq}{\begin{equation*}}
+\newcommand{\eeq}{\end{equation*}}
+
+
+\newcommand{\ben}{\begin{enumerate}}
+\newcommand{\een}{\end{enumerate}}
+
+\newcommand{\inv}[1]{#1^{-1}}
+\newcommand{\iter}[2]{{#1^{(#2)}}}
+\newcommand{\rem}[2]{#1_{/(#2)} }
+\def\id{\perp\!\!\!\perp}
+\def\eqd{\,{\buildrel d \over =}\,} 
+\newcommand{\vg}{s}
+\newcommand{\vT}{T^{(v)}}
+\newcommand{\vM}{M^{(v)}}
+\newcommand{\vmu}{\mu^{(v)}}
+\newcommand{\vtau}{\tau^{(v)}}
+\newcommand{\vt}{\vtau_{hb}}
+
+%\newcommand{\x}{x}
+
+%\newcommand{\X}{\mathbf{X}}
+%\newcommand{\Y}{\tilde{Y}}
+%\newcommand{\tepsilon}{\tilde{\epsilon}}
+%\newcommand{\blambda}{\mathbf{\lambda}}
+
+
+\newcommand{\g}{g}
+\newcommand{\M}{M}
+\newcommand{\ghx}{g(\x, T_h, M_h)}
+\newcommand{\ghxi}[2]{g(\x_{#2}, T_{#1}, \M_{#1})}
+\newcommand{\ghxvar}{g(\x, \vT_h, \vM_h)}
+%\newcommand{\E}{\mathrm{E}}
+%\newcommand{\N}{\mbox{{\small\textsc{N}}}}
+
+\newcommand{\Var}{\mathrm{Var}}
+\newcommand{\nc}{Z}
+\def\eqd{\,{\buildrel d \over =}\,} 
+
+\newcommand{\pc}{c}
+\newcommand{\pd}{d}
+
+
+\newcommand{\noth}{\tilde\f_{(h)}}
+\newcommand{\nothj}{\tilde\f_{j(h)}}
+
+
+\usepackage[makeroom]{cancel}
+\renewcommand{\CancelColor}{\color{red}}
+
+\newcommand<>{\xxcancel}[1]{\alt#2{\xcancel{#1}\vphantom{#1}}{#1}}
+
+\newcommand\independent{\protect\mathpalette{\protect\independenT}{\perp}}
+\def\independenT#1#2{\mathrel{\rlap{$#1#2$}\mkern2mu{#1#2}}}
+\title{XBART}
+\subtitle{Accelerated Bayesian Additive Regression Trees}
+\date{\today}
+\author{Jingyu He, P. Richard Hahn and Saar Yalov}
+\institute{The University of Chicago Booth School of Business and Arizona State University}
+%\titlegraphic{\hfill\includegraphics[width=3.5cm]{booth.png}}
+
+
+
+\usepackage{etoolbox}
+\usepackage{lipsum}
+
+\newcounter{multipleslide}
+
+\makeatletter%
+\newcommand{\multipleframe}{%
+\setcounter{multipleslide}{\value{framenumber}}
+\stepcounter{multipleslide}
+\patchcmd{\beamer@@tmpl@footline}% <cmd>
+  {\insertframenumber}% <search>
+  {\themultipleslide}% <replace>
+  {}% <success>
+  {}% <failure>
+}
+\newcommand{\restoreframe}{%
+\patchcmd{\beamer@@tmpl@footline}% <cmd>
+  {\themultipleslide}% <search>
+  {\insertframenumber}% <replace>
+  {}% <success>
+  {}% <failure>
+\setcounter{framenumber}{\value{multipleslide}}%
+}
+\makeatother%
+
+
+\begin{document}
+
+\maketitle
+
+
+\begin{frame}{Table of contents}
+	\setbeamertemplate{section in toc}[sections numbered]
+	\tableofcontents%[hideallsubsections]
+\end{frame}
+
+
+
+\begin{frame}
+	\frametitle{Motivation}
+	\begin{itemize}[<+->]\setlength{\itemsep}{15pt}
+		\item Classification and regression tree (CART)\\
+		      Fully grown tree without penalty of complexity, then prune the tree.
+		\item Random Forest\\
+		      Implicit regularization, the number of variables and data used to grow each tree. Also tree-level regularization.
+		\item Gradient boosting\\
+		      Add regularization to the objective function.
+		\item Bayesian addtive regression trees (BART)\\
+		      An explicit regularization prior of tree model.
+	\end{itemize}
+\end{frame}
+
+
+
+\begin{frame}[standout]
+	Thanks!
+\end{frame}
+
+
+\end{document}
