@@ -1,0 +1,412 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,bm}
+\usepackage{enumitem}
+\usepackage{hyperref}
+
+\newcommand{\Ga}{\mathrm{Ga}}
+\newcommand{\IGa}{\mathrm{IGa}}
+\newcommand{\Cat}{\mathrm{Cat}}
+\newcommand{\Dir}{\mathrm{Dirichlet}}
+\newcommand{\PIG}{\mathrm{P\mbox{-}IG}}
+\newcommand{\PTN}{\mathrm{PTN}}
+\newcommand{\diff}{\,\mathrm{d}}
+\newcommand{\E}{\mathbb{E}}
+
+\title{P-IG MCMC Sampler for the Original GaGa Model}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section{Target GaGa Model}
+
+This document writes the P-IG data-augmentation MCMC sampler for the
+GaGa model as implemented in Rossell's \texttt{gaga} package.  The main
+version below is the default \texttt{equalcv=TRUE, nclust=1} GaGa model,
+which is the version used in the Armstrong and MAQC benchmarks.  The notation
+matches the package parameters
+\[
+  a_0=\texttt{a0}, \qquad \nu=\texttt{nu}, \qquad
+  \beta=\texttt{balpha}, \qquad \mu=\texttt{nualpha}.
+\]
+All gamma distributions use the shape-rate convention.
+
+Let \(x_{ij}\) be the expression of gene \(i=1,\ldots,G\) in array
+\(j=1,\ldots,n\), and let \(g_j\in\{1,\ldots,K\}\) be its experimental group.
+Let \(h=0,\ldots,H-1\) index expression patterns.  Pattern \(h\) maps groups
+to clusters through
+\[
+  c_h(g)\in\{1,\ldots,C_h\}.
+\]
+For example, the null pattern has \(C_h=1\), while the full alternative has
+one cluster per group.
+
+The default constant-CV GaGa model is
+\begin{align}
+  x_{ij}\mid \alpha_i,\lambda_{i,c_h(g_j)},\delta_i=h
+    &\sim \Ga\!\left(\alpha_i,\,
+      \frac{\alpha_i}{\lambda_{i,c_h(g_j)}}\right),
+      \label{eq:obs}\\
+  \lambda_{ic}\mid a_0,\nu
+    &\sim \IGa\!\left(a_0,\frac{a_0}{\nu}\right),
+      \qquad c=1,\ldots,C_{\delta_i}, \label{eq:lambda-prior}\\
+  \alpha_i\mid \beta,\mu
+    &\sim \Ga\!\left(\beta,\frac{\beta}{\mu}\right),
+      \label{eq:alpha-prior}\\
+  \delta_i\mid \bm\pi
+    &\sim \Cat(\pi_0,\ldots,\pi_{H-1}). \label{eq:pattern-prior}
+\end{align}
+Equivalently, with \(q_{ic}=1/\lambda_{ic}\),
+\[
+  q_{ic}\mid a_0,\nu \sim \Ga\!\left(a_0,\frac{a_0}{\nu}\right).
+\]
+
+The hyperpriors used by the fully Bayesian GaGa model can be written as
+\begin{align}
+  a_0 &\sim \Ga(a_{a_0},b_{a_0}), &
+  \nu &\sim \IGa(a_\nu,b_\nu), \nonumber\\
+  \beta &\sim \Ga(a_\beta,b_\beta), &
+  \mu &\sim \IGa(a_\mu,b_\mu), \nonumber\\
+  \bm\pi &\sim \Dir(p_0,\ldots,p_{H-1}). \label{eq:hyperpriors}
+\end{align}
+
+\section{Sufficient Statistics Under a Pattern}
+
+For gene \(i\), pattern \(h\), and cluster \(c\), define
+\begin{align}
+  I_{hc} &= \{j: c_h(g_j)=c\}, &
+  n_{hc} &= |I_{hc}|, \nonumber\\
+  S_{ihc} &= \sum_{j\in I_{hc}} x_{ij}, &
+  L_{ihc} &= \sum_{j\in I_{hc}} \log x_{ij}, \nonumber\\
+  r_0 &= \frac{a_0}{\nu}.
+\end{align}
+
+After integrating \(q_{ic}=1/\lambda_{ic}\), the cluster marginal likelihood
+conditional on \(\alpha_i=\alpha\) is
+\begin{align}
+  m_{ihc}(\alpha)
+  &=
+  \int p(\bm x_{ihc}\mid \alpha,q)\,p(q\mid a_0,\nu)\,\diff q \nonumber\\
+  &=
+  \frac{r_0^{a_0}}{\Gamma(a_0)}
+  \frac{\Gamma(a_0+n_{hc}\alpha)}{\Gamma(\alpha)^{n_{hc}}}
+  \frac{
+    \alpha^{n_{hc}\alpha}
+    \exp\{(\alpha-1)L_{ihc}\}
+  }{
+    (r_0+\alpha S_{ihc})^{a_0+n_{hc}\alpha}
+  }.
+  \label{eq:cluster-marginal}
+\end{align}
+The pattern likelihood is
+\[
+  m_{ih}(\alpha)=\prod_{c=1}^{C_h} m_{ihc}(\alpha).
+\]
+
+\section{Pattern Update}
+
+Given \(\alpha_i\) and the hyperparameters, update the expression pattern by
+\begin{align}
+  \Pr(\delta_i=h\mid \alpha_i,\bm x_i,\Theta)
+  =
+  \frac{\pi_h m_{ih}(\alpha_i)}
+       {\sum_{\ell=0}^{H-1}\pi_\ell m_{i\ell}(\alpha_i)}.
+  \label{eq:pattern-update}
+\end{align}
+This is the same pattern posterior structure used by \texttt{gaga}; the
+difference is that \(\alpha_i\) is sampled with P-IG augmentation rather than
+using Rossell's gamma-shape approximation.
+
+\section{Collapsed Conditional for \texorpdfstring{\(\alpha_i\)}{alpha}}
+
+Given \(\delta_i=h\), the collapsed conditional density of \(\alpha_i\) is
+proportional to
+\begin{align}
+  p(\alpha_i=\alpha \mid \delta_i=h,\bm x_i,\Theta)
+  &\propto
+  \alpha^{\beta-1}\exp\!\left(-\frac{\beta}{\mu}\alpha\right)
+  \prod_{c=1}^{C_h} m_{ihc}(\alpha).
+  \label{eq:alpha-target}
+\end{align}
+Dropping constants that do not depend on \(\alpha\),
+\begin{align}
+  \log p(\alpha\mid\cdot)
+  &=
+  (\beta-1)\log\alpha-\frac{\beta}{\mu}\alpha \nonumber\\
+  &\quad+
+  \sum_{c=1}^{C_h}
+  \left[
+    n_{hc}\alpha\log\alpha
+    -n_{hc}\log\Gamma(\alpha)
+    +(\alpha-1)L_{ihc}
+    +\log\Gamma(a_0+n_{hc}\alpha)
+    -(a_0+n_{hc}\alpha)\log(r_0+\alpha S_{ihc})
+  \right].
+  \label{eq:alpha-log-target}
+\end{align}
+
+\section{P-IG Augmentation for the Gamma-Shape Conditional}
+
+Let
+\[
+  N_h=\sum_{c=1}^{C_h} n_{hc}.
+\]
+The reciprocal gamma terms are handled by the P-IG identity
+\[
+  \frac{1}{\Gamma(\alpha)^{N_h}}
+  \propto
+  \alpha^{N_h}\exp(N_h\gamma\alpha)\,
+  \E\!\left[\exp\!\left(-\alpha^2\sum_{s=1}^{N_h}\omega_s\right)\right],
+  \qquad
+  \omega_s\mid \alpha\sim \PIG(\alpha),
+\]
+where \(\gamma=-\psi(1)\) is the Euler--Mascheroni constant.
+
+The numerator gamma terms are augmented by
+\[
+  \Gamma(a_0+n_{hc}\alpha)
+  =
+  \int_0^\infty
+  \tau_c^{a_0+n_{hc}\alpha-1}\exp(-\tau_c)\,\diff\tau_c,
+  \qquad
+  \tau_c\mid\alpha\sim \Ga(a_0+n_{hc}\alpha,1).
+\]
+
+Given the auxiliary variables, define
+\[
+  \Omega=\sum_{s=1}^{N_h}\omega_s
+\]
+and
+\begin{align}
+  B_{ih}
+  =
+  N_h\gamma
+  +\sum_{c=1}^{C_h} L_{ihc}
+  -\frac{\beta}{\mu}
+  +\sum_{c=1}^{C_h} n_{hc}\log\tau_c.
+  \label{eq:Bih}
+\end{align}
+The augmented conditional for \(\alpha\) has the form
+\begin{align}
+  p(\alpha\mid\bm\tau,\bm\omega,\delta_i=h,\bm x_i,\Theta)
+  \propto
+  \alpha^{N_h+\beta-1}
+  \exp\{-\Omega\alpha^2+B_{ih}\alpha\}
+  \exp\{R_{ih}(\alpha)\},
+  \label{eq:aug-alpha}
+\end{align}
+where the non-PTN remainder is
+\begin{align}
+  R_{ih}(\alpha)
+  =
+  N_h\alpha\log\alpha
+  -
+  \sum_{c=1}^{C_h}
+  (a_0+n_{hc}\alpha)\log(r_0+\alpha S_{ihc}).
+  \label{eq:remainder}
+\end{align}
+
+\section{Exact Log-Scale Slice Step for \texorpdfstring{\(\alpha_i\)}{alpha}}
+
+The benchmark implementation samples the augmented conditional
+\eqref{eq:aug-alpha} directly on the log scale.  Let \(y=\log\alpha\).  After
+including the Jacobian, the log density for \(y\) is
+\begin{align}
+  \ell_{ih}(y)
+  =
+  (N_h+\beta)y
+  -\Omega\exp(2y)
+  +B_{ih}\exp(y)
+  +R_{ih}\{\exp(y)\}.
+  \label{eq:log-alpha-slice}
+\end{align}
+The code uses a standard stepping-out and shrinkage slice sampler for
+\(\ell_{ih}(y)\), then sets \(\alpha_i=\exp(y)\).  This is an exact
+one-dimensional MCMC update for the same P-IG-augmented conditional, and it
+avoids the near-zero acceptance of the plain PTN independence proposal in the
+real microarray benchmarks.
+
+\paragraph{Optional PTN independence proposal.}
+One exact diagnostic proposal uses only the PTN part of \eqref{eq:aug-alpha}:
+\[
+  \alpha^\star
+  \sim
+  \PTN\!\left(
+    p=N_h+\beta,\,
+    a=\Omega,\,
+    b=B_{ih}
+  \right),
+\]
+where
+\[
+  \PTN(p,a,b):\quad f(x)\propto x^{p-1}\exp(-a x^2+bx),\qquad x>0.
+\]
+Since this proposal is independent of the current \(\alpha\) conditional on
+\((\bm\tau,\bm\omega)\), the PTN terms cancel in the Metropolis ratio, and
+\[
+  A(\alpha\to\alpha^\star)
+  =
+  \min\left\{
+    1,\,
+    \exp\!\left[
+      R_{ih}(\alpha^\star)-R_{ih}(\alpha)
+    \right]
+  \right\}.
+  \label{eq:exact-alpha-accept}
+\]
+This is exact but mixes poorly in the real-data examples.
+
+\paragraph{Optional tangent proposal.}
+For efficiency one may instead propose from
+\[
+  \PTN\!\left(N_h+\beta,\Omega,B_{ih}+R'_{ih}(\alpha)\right).
+\]
+This is a state-dependent proposal.  It is only exact if the full
+Metropolis--Hastings ratio includes the reverse proposal density, including
+the PTN normalizing constants.  Without those proposal-density terms it is an
+approximation, not an exact MCMC step.
+
+\section{Sampling the Mean Parameters}
+
+After updating \((\delta_i,\alpha_i)\), sample the inverse means for the
+active pattern clusters:
+\begin{align}
+  q_{ic}=1/\lambda_{ic}
+  \mid \alpha_i,\delta_i=h,\bm x_i,a_0,\nu
+  \sim
+  \Ga\!\left(
+    a_0+n_{hc}\alpha_i,\,
+    \frac{a_0}{\nu}+\alpha_i S_{ihc}
+  \right).
+  \label{eq:q-update}
+\end{align}
+This update is useful for the fully Bayesian hyperparameter updates below.
+If hyperparameters are fixed at empirical-Bayes estimates, this step is not
+needed for posterior pattern probabilities.
+
+\section{Hyperparameter Updates}
+
+The pattern probabilities have the conjugate update
+\[
+  \bm\pi\mid \bm\delta
+  \sim
+  \Dir\!\left(p_0+n_0,\ldots,p_{H-1}+n_{H-1}\right),
+  \qquad
+  n_h=\sum_{i=1}^G \mathbf{1}\{\delta_i=h\}.
+\]
+If \(\rho=1/\nu\) and \(\nu\sim \IGa(a_\nu,b_\nu)\), then
+\[
+  \rho\mid \bm q,a_0
+  \sim
+  \Ga\!\left(
+    a_\nu+a_0M_q,\,
+    b_\nu+a_0\sum_{i,c} q_{ic}
+  \right),
+  \qquad
+  \nu=1/\rho,
+\]
+where \(M_q=\sum_i C_{\delta_i}\) is the number of active gene-pattern
+clusters.
+
+If \(\eta=1/\mu\) and \(\mu\sim \IGa(a_\mu,b_\mu)\), then
+\[
+  \eta\mid \bm\alpha,\beta
+  \sim
+  \Ga\!\left(
+    a_\mu+\beta G,\,
+    b_\mu+\beta\sum_{i=1}^G\alpha_i
+  \right),
+  \qquad
+  \mu=1/\eta.
+\]
+
+The conditionals for \(a_0\) and \(\beta\) are again gamma-shape targets and
+can be updated with the same P-IG--PTN remainder-MH construction.  For example,
+up to constants,
+\begin{align}
+  \log p(a_0\mid \bm q,\nu)
+  &=
+  (a_{a_0}-1)\log a_0-b_{a_0}a_0
+  +M_q a_0\log(a_0/\nu)
+  -M_q\log\Gamma(a_0) \nonumber\\
+  &\quad
+  +(a_0-1)\sum_{i,c}\log q_{ic}
+  -\frac{a_0}{\nu}\sum_{i,c}q_{ic}.
+  \label{eq:a0-target}
+\end{align}
+Similarly, up to constants,
+\begin{align}
+  \log p(\beta\mid \bm\alpha,\mu)
+  &=
+  (a_\beta-1)\log\beta-b_\beta\beta
+  +G\beta\log(\beta/\mu)
+  -G\log\Gamma(\beta) \nonumber\\
+  &\quad
+  +(\beta-1)\sum_{i=1}^G\log\alpha_i
+  -\frac{\beta}{\mu}\sum_{i=1}^G\alpha_i.
+  \label{eq:beta-target}
+\end{align}
+Equations \eqref{eq:a0-target} and \eqref{eq:beta-target} contain
+\(\Gamma(\cdot)^{-M}\) factors and are therefore natural P-IG updates.
+
+\section{Full MCMC Algorithm}
+
+One MCMC sweep for the \texttt{equalcv=TRUE, nclust=1} GaGa model is:
+\begin{enumerate}[label=\arabic*.]
+  \item For each gene \(i\), update \(\delta_i\) using
+        \eqref{eq:pattern-update}.
+  \item For each gene \(i\), update \(\alpha_i\):
+        draw \(\tau_c\), draw \(\omega_s\sim\PIG(\alpha_i)\), sample
+        \(y_i=\log\alpha_i\) from \eqref{eq:log-alpha-slice} by slice
+        sampling, and set \(\alpha_i=\exp(y_i)\).
+  \item Sample \(q_{ic}=1/\lambda_{ic}\) for active clusters using
+        \eqref{eq:q-update}.
+  \item Update \(\bm\pi\) by its Dirichlet conditional.
+  \item Update \(\nu\) and \(\mu\) through \(\rho=1/\nu\) and
+        \(\eta=1/\mu\).
+  \item Update \(a_0\) and \(\beta\) with P-IG remainder-MH steps based on
+        \eqref{eq:a0-target} and \eqref{eq:beta-target}, or hold them fixed
+        at empirical-Bayes estimates for a direct comparison with
+        \texttt{gaga::fitGG}.
+\end{enumerate}
+
+Posterior pattern probabilities are estimated by
+\[
+  \widehat{\Pr}(\delta_i=h\mid\bm x)
+  =
+  \frac{1}{T}\sum_{t=1}^T
+  \mathbf{1}\{\delta_i^{(t)}=h\},
+\]
+or, with Rao--Blackwellization,
+\[
+  \widehat{\Pr}(\delta_i=h\mid\bm x)
+  =
+  \frac{1}{T}\sum_{t=1}^T
+  \Pr(\delta_i=h\mid \alpha_i^{(t)},\bm x_i,\Theta^{(t)}).
+\]
+Differential-expression calls use the same posterior FDR rule as GaGa, with
+the all-equal pattern \(h=0\) as the null.
+
+\section{Extensions}
+
+\paragraph{Varying CV, \texttt{equalcv=FALSE}.}
+The original GaGa model also permits cluster-specific shapes
+\(\alpha_{ic}\).  Conditional on a fixed pattern \(h\), each active cluster
+has the same P-IG update as above with \(N_h\) replaced by \(n_{hc}\) and with
+only the sufficient statistics \((n_{hc},S_{ihc},L_{ihc})\) for that cluster.
+The pattern update then involves a trans-dimensional move unless the
+\(\alpha_{ic}\)'s are integrated out.  A practical exact implementation can
+use reversible-jump moves, or compute the pattern probabilities by an inner
+P-IG sampler for each candidate pattern.
+
+\paragraph{MiGaGa, \texttt{nclust>1}.}
+MiGaGa adds a gene-cluster indicator \(d_i\) with component-specific
+\((a_{0d},\nu_d)\).  Conditional on \(d_i=d\), all formulas above hold with
+\((a_0,\nu)\) replaced by \((a_{0d},\nu_d)\).  The update of \(d_i\) is a
+categorical step using the component prior probabilities and the corresponding
+collapsed likelihood.
+
+\end{document}

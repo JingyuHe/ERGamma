@@ -1,0 +1,4 @@
+"method","n_fit_probes","n_qpcr_assays","n_mapped_assays","n_validated_mapped","auc_scaled","auc_standard","spearman_probe_score_vs_gaga","n_de_at_fdr","gaga_fit_method","elapsed_gaga_seconds","elapsed_pig_seconds","qPCR_validation_engine"
+"GaGa",1893,1044,867,830,0.0325706508941863,0.797232171930967,1,1540,"EM",0.829999999999998,9.983,"limma"
+"PIG_GaGa",1893,1044,867,830,0.0325706508941863,0.797232171930967,0.999999988847604,1540,"EM",0.829999999999998,9.983,"limma"
+"limma_F",1893,1044,867,830,0.0329497970570276,0.806512536633019,0.988099249617064,NA,"EM",0.829999999999998,9.983,"limma"

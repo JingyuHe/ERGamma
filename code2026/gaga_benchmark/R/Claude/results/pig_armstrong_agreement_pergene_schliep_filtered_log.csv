@@ -1,0 +1,4 @@
+"method_pair","both_DE","only_first","only_second","both_EE","jaccard"
+"PIG_pergene vs gaga_fitGG",360,0,0,1834,1
+"PIG_pergene vs limma_BH",268,92,93,1741,0.591611479028698
+"gaga_fitGG vs limma_BH",268,92,93,1741,0.591611479028698

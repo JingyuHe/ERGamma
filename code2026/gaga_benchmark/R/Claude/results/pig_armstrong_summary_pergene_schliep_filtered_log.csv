@@ -1,0 +1,4 @@
+"method","n_DE","elapsed_sec","spearman_with_gaga_score"
+"PIG_pergene",360,2.30777382850647,0.99999519709812
+"gaga_fitGG",360,NA,1
+"limma_BH",361,NA,NA

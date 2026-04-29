@@ -1,0 +1,4 @@
+"method_pair","both_DE","only_first","only_second","both_EE","jaccard"
+"PIG_GaGa vs gaga_fitGG",250,89,110,1745,0.556792873051225
+"PIG_GaGa vs limma_BH",198,141,163,1692,0.394422310756972
+"gaga_fitGG vs limma_BH",268,92,93,1741,0.591611479028698

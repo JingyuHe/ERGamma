@@ -1,0 +1,4 @@
+"pair","both_DE","only_first","only_second","both_EE","jaccard"
+"PIG_MCMC vs gaga_fitGG",316,633,74,11510,0.308895405669599
+"PIG_MCMC vs limma_BH",590,359,2392,9192,0.176593834181383
+"gaga_fitGG vs limma_BH",378,12,2604,9539,0.12625250501002
