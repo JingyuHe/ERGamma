@@ -1,0 +1,15 @@
+affinity.spline.coefs   Spline coefficients for estimation of affinity
+                        from probe sequence
+bg.adjust.affinities    Background adjustment with sequence information
+                        (internal function)
+bg.adjust.gcrma         GCRMA background adjust (internal function)
+bg.parameters.ns        Estimation of non-specific Binding Background
+                        Parameters
+compute.affinities      Probe Affinity computation
+gcrma                   Robust Multi-Array expression measure using
+                        sequence information
+gcrma.engine            GCRMA background adjust engine(internal
+                        function)
+gcrma.engine2           GCRMA background adjust engine(internal
+                        function)
+justGCRMA               Compute GCRMA Directly from CEL Files

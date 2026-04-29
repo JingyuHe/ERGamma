@@ -1,0 +1,26 @@
+useDynLib(EBarrays)
+
+
+import(methods)
+
+importMethodsFrom(Biobase, exprs)
+
+importFrom(cluster, clara)
+
+importFrom(graphics, abline, image, lines, plot)
+
+importFrom(grDevices, rgb)
+
+importFrom(lattice, equal.count, histogram, panel.histogram,
+           panel.qqmath, panel.qqmathline, panel.xyplot, qqmath,
+           simpleKey, xyplot)
+
+importFrom(stats, coef, dchisq, density, dnorm, lm, lowess, optim,
+           pbeta, pnorm, ppoints, qchisq, qgamma, qnorm, rgamma, rnorm,
+           uniroot, var)
+
+
+export(checkCCV, checkModel, checkVarsMar, checkVarsQQ, crit.fun,
+       eb.createFamilyGG, eb.createFamilyLNN, eb.createFamilyLNNMV,
+       ebPatterns, emfit, emfit0, emfit1, emfit2, emfit3, emfitmv,
+       plot.ebarraysEMfit, plotCluster, plotMarginal, postprob)

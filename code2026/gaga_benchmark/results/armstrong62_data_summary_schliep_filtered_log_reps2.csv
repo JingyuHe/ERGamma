@@ -1,0 +1,2 @@
+"data","transform","n_genes","n_samples","n_all","n_mll","full_data_truth_de","parametric_prior_de_probability","parametric_generator","reps","fdr_target","fit_method"
+"schliep_filtered","log",2194,42,24,18,360,0.429188062008177,"gaga::simGG using full-data GaGa posterior-mean hyperparameters",2,0.05,"quickEM"

@@ -1,164 +1,144 @@
+local_lib <- file.path(getwd(), "r-lib")
+if (dir.exists(local_lib)) {
+  .libPaths(c(local_lib, .libPaths()))
+}
+
 library(GIGrvg)
-rPIG_ERGamma = function(n, cc, N) {
-  # set dk = k
-  # n is number of rvs
-  # c is a scalar
-  # N is number of truncation
-  
-  output = rep(0,n)
-  
-  if(N > 0)
-  {
+library(gtools)
+
+gamma_const <- -digamma(1)
+
+# Draw n samples from PIG(c) using the JASA parameterization:
+# PIG(c) = sum_k GIG(-3/2, 2 c^2, 1/(2 k^2)).
+rPIG_ERGamma <- function(n, cc, N) {
+  output <- rep(0, n)
+
+  if (N > 0) {
     for (i in 1:N) {
-      if(cc == 0)
-      {
-        output = output + 1/rgamma(n, shape=3/2)/(4*i^2)
-      }else
-      {
-        output = output + rgig(n = n, lambda = -3 / 2, chi = 1 / 2 / i ^ 2, 2*cc ^ 2)
+      if (cc == 0) {
+        output <- output + 1 / rgamma(n, shape = 3 / 2) / (4 * i^2)
+      } else {
+        output <- output + rgig(
+          n = n,
+          lambda = -3 / 2,
+          chi = 1 / (2 * i^2),
+          psi = 2 * cc^2
+        )
       }
-      
     }
   }
-  if(cc == 0)
-  {
-    temp1 = trigamma(1+N)
-    temp2 = psigamma(1+N,deriv = 2)
-    b = -4*temp1/temp2
-    a = 0.5*temp1*b
-  }else{
-    temp1 = digamma(1+N+cc) - digamma(1+N)
-    temp2 = temp1 - cc*trigamma(1+N+cc)
-    b = 2*cc^2*temp1 / temp2
-    a = b/(2*cc)*temp1
+
+  if (cc == 0) {
+    temp1 <- trigamma(1 + N)
+    temp2 <- psigamma(1 + N, deriv = 2)
+    rate <- -4 * temp1 / temp2
+    shape <- 0.5 * temp1 * rate
+  } else {
+    temp1 <- digamma(1 + N + cc) - digamma(1 + N)
+    temp2 <- temp1 - cc * trigamma(1 + N + cc)
+    rate <- 2 * cc^2 * temp1 / temp2
+    shape <- rate / (2 * cc) * temp1
   }
 
-  output = output + rgamma(n,a,rate=b)
-  return(output)
+  output + rgamma(n, shape, rate = rate)
 }
 
+# Draw one sample from the power-truncated normal kernel
+# x^(m - 1) exp(-a x^2 + b x), x > 0.
+rH <- function(m, a, b, max_try = 5000) {
+  tau <- ifelse(
+    b > 0,
+    0.5 + sqrt(1 / 4 + 2 * a * m / b^2),
+    -0.5 + sqrt(1 / 4 + 2 * a * m / b^2)
+  )
+  v1 <- tau * abs(b) - b
+  v2 <- tau * abs(b) / (2 * a)
 
-
-rH = function(m,a,b,max_try = 500)
-{
-  tau = ifelse(b>0, 0.5+sqrt(1/4+2*a*m/b^2), -0.5+sqrt(1/4+2*a*m/b^2))
-  # cat("m=",m," a=", a, " b=", b, " tau=",tau, "\n")
-  v1 = tau*abs(b)-b
-  v2 = tau*abs(b)/(2*a)
-  
-  for(i in 1:max_try)
-  {
-    x = rgamma(1,m,rate=v1)
-    # cat("x=",x," v1=", v1, " v2=", v2, "\n")
-    if(runif(1) <= exp(-a*(x-v2)^2))
+  for (i in 1:max_try) {
+    x <- rgamma(1, m, rate = v1)
+    if (runif(1) <= exp(-a * (x - v2)^2)) {
       return(x)
+    }
   }
+  NA_real_
 }
 
+# Multinomial-Dirichlet Gibbs sampler used by the opioid script.
+Gibbs_MD <- function(data, tau = 0, beta = 0, niter = 1000, N_truncations = 300) {
+  M <- dim(data)[1]
+  K <- dim(data)[2]
+  p <- matrix(1, M, K)
+  w <- matrix(1, M, K)
+  alpha <- matrix(1, niter, K)
 
-a = rPIG_ERGamma(500,cc=1,N=200)
-b = rPIG_ERGamma_2(500,cc=1,N=200)
-hist(a,breaks = 30)
-hist(b,breaks = 30)
+  for (i in 2:niter) {
+    if (i %% 100 == 0) {
+      cat("sampling ", i, "\n")
+    }
 
+    for (m in 1:M) {
+      p[m, ] <- pmax(rdirichlet(1, alpha[i - 1, ] + data[m, ]), 1e-9)
+    }
 
-calc_MGF = function(s,sample)
-{
-  # calculate sample expectation of exp(-s^2*X)
-  sapply(s, FUN = function(x) mean(exp(-x^2*sample)))
-}
+    eta <- rgamma(M, shape = sum(alpha[i - 1, ]))
 
+    for (k in 1:K) {
+      w[, k] <- rPIG_ERGamma(M, alpha[i - 1, k], N_truncations)
+    }
 
-par(mfrow=c(2,3))
-for(c in c(0.01,0.05,0.1,0.5,1,5))
-{
-  s = seq(0,5,0.01)
-  mgf = exp(lgamma(1+c)-lgamma(1+sqrt(s^2+c^2))+digamma(1)*(sqrt(s^2+c^2)-c))
-  plot(s,mgf,"n",lwd=2,ylab="E[e^(-s^2*X)]",main=paste("c =",c))
-  N_list = c(0,1,5,10,50,100,300)
-  for(i in 1:7)
-  {
-    sample = rPIG_ERGamma(1000,cc=c,N=N_list[i])
-    res = calc_MGF(s,sample)
-    lines(s, res, col=i+1,lwd=2)
+    a <- apply(w, 2, sum)
+    b <- M * gamma_const - beta + sum(log(eta)) + apply(log(p), 2, sum)
+    for (k in 1:K) {
+      alpha[i, k] <- rH(M + tau, a[k], b[k])
+    }
   }
-  lines(s, mgf, lwd=2)
-  legend("topright",legend=paste("N =",N_list),lwd=2,col=2:8)
+
+  alpha
 }
 
+# Expectation-only approximation for large Multinomial-Dirichlet runs.
+Gibbs_MD_E <- function(data, tau = 0, beta = 0, niter = 1000) {
+  M <- dim(data)[1]
+  K <- dim(data)[2]
+  alpha <- matrix(1, niter, K)
 
+  for (i in 2:niter) {
+    if (i %% 100 == 0) {
+      cat("sampling ", i, "\n")
+    }
 
+    p_e <- t(t(data) + alpha[i - 1, ])
+    log_p_e <- digamma(p_e) - digamma(apply(p_e, 1, sum))
+    log_eta_e <- digamma(sum(alpha[i - 1, ]))
+    w_e <- (gamma_const + digamma(alpha[i - 1, ] + 1)) / (2 * alpha[i - 1, ])
 
+    a <- M * w_e
+    b <- M * gamma_const - beta + M * log_eta_e + apply(log_p_e, 2, sum)
+    for (k in 1:K) {
+      alpha[i, k] <- rH(M + tau, a[k], b[k])
+    }
+  }
 
+  alpha
+}
 
+ltarget_md <- function(data, alpha) {
+  res <- sum(apply(data, 1, function(x) {
+    lgamma(sum(alpha)) - lgamma(sum(alpha + x)) + sum(lgamma(alpha + x) - lgamma(alpha))
+  }))
+  res - sum(alpha)
+}
 
-# rPIG_ERGamma_2 = function(n, cc, N, max_try = 500){ # Not better than the original
-#   # first sample ERG(0)
-#   output = rep(0, n)
-#   for(i in 1:n)
-#   {
-#     for(b in 1:max_try)
-#     {
-#       U = runif(1)
-#       W = sum(1/rgamma(N,shape = 3/2)/(4*(1:N)^2))
-#       
-#       if(U < exp(-cc^2*W))
-#       {
-#         break
-#       }
-#     }
-#     if(b == max_try)
-#     {
-#       print("no acceptance")
-#     }
-#     output[i] = W
-#   }
-#   return(output)
-# }
+MH_MD <- function(data, ltarget = ltarget_md, tau = 1, step, init = NULL, niter = 1000) {
+  K <- dim(data)[2]
+  x <- matrix(0, niter, K)
+  x[1, ] <- if (is.null(init)) abs(rnorm(K, sd = tau)) else init
 
+  for (i in 2:niter) {
+    propose <- x[i - 1, ] * exp(rnorm(K, sd = step))
+    ratio <- exp(ltarget(data, propose) - ltarget(data, x[i - 1, ]))
+    x[i, ] <- if (runif(1) < ratio) propose else x[i - 1, ]
+  }
 
-
-# rPIG_ERGamma_saddle = function(n, cc, tol = 1e-6, max.T=500) # Not working correctly
-# {
-#   
-#   gamma_const = -digamma(1)
-#   const = gamma_const*cc + lgamma(1+cc)
-#   output = rep(0,n)
-#   for(i in 1:n)
-#   {
-#     U = runif(1)
-#     t = cc/2
-#     for(b in 1:max.T)
-#     {
-#       print(t)
-#       ct = sqrt(cc^2-t)
-#       k = -gamma_const*ct - lgamma(1+ct) + const
-#       numerator = gamma_const+digamma(1+ct)
-#       k1 = numerator/2/ct
-#       k2 = (numerator-ct*trigamma(1+ct))/4/ct^3
-#       
-#       w = sign(t)*sqrt(2*(t*k1 - k))
-#       u = t*sqrt(k2)
-#       Ft = pnorm(w) + dnorm(w)*((1/w) - 1/(u))
-#       
-#       delta = (Ft-U)/(sqrt(k2)*dnorm(w))
-#       
-#       if(abs(delta) < tol)
-#       {
-#         t = t-delta
-#         break 
-#       }
-#       if(t - delta >= cc)
-#       {
-#         delta = (t-cc)/2
-#       }
-#       
-#       t = t-delta
-#     }
-#     ct = sqrt(cc^2-t)
-#     output[i] = (gamma_const+digamma(1+ct))/2/ct
-#   }
-#   
-#   return(output)
-# }
-# 
+  x
+}

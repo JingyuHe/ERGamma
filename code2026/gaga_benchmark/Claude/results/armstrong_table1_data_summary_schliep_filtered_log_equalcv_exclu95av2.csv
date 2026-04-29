@@ -1,0 +1,2 @@
+"data","source_file","transform","exclude_u95av2","equalcv","n_genes","n_samples","n_all","n_mll","reps","methods"
+"schliep_filtered","/sessions/awesome-eager-hamilton/mnt/ERGamma/code2026/gaga_benchmark/data/armstrong-2002-v2_database.txt","log",TRUE,TRUE,2194,42,24,18,1,"GaGa,MiGaGa2,limma_BH"

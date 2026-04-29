@@ -3,6 +3,14 @@ library(ggplot2)
 library(reshape2)
 library(moments)
 
+mm = function(x)
+{
+  cat("mean = ",mean(x),"\n")
+  cat("variance = ",var(x),"\n")
+  cat("skewness = ",skewness(x),"\n")
+  cat("kurtosis = ",kurtosis(x), "\n")
+}
+
 # Miller's derivative matching strategy
 calc_AB = function(delta, mu, init.x=1, tol=1e-3,max.T=500)
 {
@@ -159,20 +167,13 @@ plot(tail(xi_data[,3],2000),main="n = 30",
 abline(h=5,col="red",lwd=3,lty=2)
 dev.off()
 
-mm = function(x)
-{
-  cat("mean = ",mean(x),"\n")
-  cat("variance = ",var(x),"\n")
-  cat("skewness = ",skewness(x),"\n")
-  cat("kurtosis = ",kurtosis(x))
-  
-}
-
 mm(xi_data[,1])
 
 # EM
 set.seed(123)
 n = 500; alpha = 3; beta = 1.5
+B = 100
+xpath = rep(NA, B)
 plot(1:B, xpath, type="n", xlab="step", ylab="alpha", main="Path of alpha",
      ylim=c(0,8))
 y = rgamma(n,shape=alpha,rate=beta)
@@ -209,6 +210,8 @@ for(j in 1:30)
 
 
 # EM2
+B = 100
+xpath = rep(NA, B)
 plot(1:B, xpath, type="n", xlab="step", ylab="alpha", main="Path of alpha",
      ylim=c(0,8))
 mu = 5.09/4.26
@@ -259,6 +262,7 @@ y = function(x)
   gamma(x)/gamma(0.04*x)^2*exp(-0.06*x^2-1.28*x)
 }
 x = 10
+tol = 1e-3
 for(i in 1:10000)
 {
   A = 1 - x^2*(-0.12-0.0032*trigamma(0.04*x)+trigamma(x))

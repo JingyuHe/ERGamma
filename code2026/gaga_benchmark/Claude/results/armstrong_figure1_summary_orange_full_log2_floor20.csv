@@ -1,0 +1,2 @@
+"data","transform","n_genes","n_samples","n_all","n_mll","ga_de","gaga_probpat_de","migaga_probpat_de","fit_method","n_prior"
+"orange_full","log2_floor20",12533,42,24,18,1724,0.0677910556993462,0.107535088681047,"quickEM",10000

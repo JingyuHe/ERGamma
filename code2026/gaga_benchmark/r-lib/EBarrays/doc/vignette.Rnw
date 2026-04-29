@@ -1,0 +1,804 @@
+% NOTE -- ONLY EDIT THE .Rnw FILE!!!  The .tex file is
+% likely to be overwritten.
+%
+%\VignetteIndexEntry{Introduction to EBarrays}
+%\VignetteDepends{Biobase, EBarrays}
+%\VignetteKeywords{Parametric Empirical Bayes}
+%\VignettePackage{EBarrays}
+
+\documentclass[12pt]{article}
+
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{Sweave}
+
+\newcommand{\ebpack}{\textsf{EBarrays}}
+\newcommand{\R}{\textsf{R}}
+\newcommand{\bioc}{\textsf{Bioconductor}}
+\newcommand{\code}[1]{\textsf{#1}}
+
+\textwidth=6.2in
+\textheight=8.5in
+%\parskip=.3cm
+\oddsidemargin=.1in
+\evensidemargin=.1in
+\headheight=-.3in
+
+\begin{document}
+
+\title{Parametric Empirical Bayes Methods for Microarrays}
+\author{Ming Yuan, Deepayan Sarkar, Michael Newton \\
+and Christina Kendziorski}
+\maketitle
+\tableofcontents
+
+\section{Introduction}
+
+We have developed an empirical Bayes methodology for gene expression
+data to account for replicate arrays, multiple conditions, and a range
+of modeling assumptions.  The methodology is implemented in the \R{}
+package \ebpack{}. Functions calculate posterior probabilities of
+patterns of differential expression across multiple conditions. Model
+assumptions can be checked.  This vignette provides a brief overview
+of the methodology and its implementation.  For details on the
+methodology, see Newton {\it et al.} 2001, Kendziorski {\it et al.},
+2003, and Newton and Kendziorski, 2003.  We note that some of the
+function calls in version 1.7 of EBarrays have changed.
+
+\section{General Model Structure: Two Conditions}
+
+Our models attempt to characterize the probability distribution of
+expression measurements ${\bf x}_j = (x_{j 1}, x_{j 2}, \ldots, x_{j
+  I})$ taken on a gene $j$.  As we clarify below, the parametric
+specifications that we adopt allow either that these $x_{ji}$ are
+recorded on the original measurement scale or that they have been
+log-transformed. Additional assumptions can be considered within this
+framework.  A baseline hypothesis might be that the $I$ samples are
+exchangeable (i.e., that potentially distinguishing factors, such as
+cell-growth conditions, have no bearing on the distribution of
+measured expression levels).  We would thus view measurements $x_{j
+  i}$ as independent random deviations from a gene-specific mean value
+$\mu_j$ and, more specifically, as arising from an observation
+distribution $f_{\it obs}(\cdot| \mu_j)$.
+
+When comparing expression samples between two groups (e.g., cell
+types), the sample set $\{1, 2, \ldots,I\}$ is partitioned into two
+subsets, say $s_1$ and $s_2$; $s_c$ contains the indices for samples
+in group $c$.  The distribution of measured expression may not be
+affected by this grouping, in which case our baseline hypothesis above
+holds and we say that there is equivalent expression, EE$_j$, for gene
+$j$.  Alternatively, there is differential expression (DE$_j$) in which
+case our formulation requires that there now be two different means,
+$\mu_{j 1}$ and $\mu_{j 2}$, corresponding to measurements in $s_1$
+and $s_2$, respectively.  We assume that the gene effects arise
+independently and identically from a system-specific distribution
+$\pi( \mu )$.  This allows for information sharing amongst genes.
+Were we instead to treat the $\mu_j$'s as fixed effects, there would
+be no information sharing and potentially a loss in efficiency.
+
+Let $p$ denote the fraction of genes that are differentially expressed
+(DE); then $1-p$ denotes the fraction of genes equivalently expressed
+(EE).  An EE gene $j$ presents data ${\bf x}_j=(x_{j 1}, \ldots, x_{j
+  I})$ according to a distribution
+\begin{eqnarray}
+\label{eq:f0}
+f_0( {\bf x}_j ) = \int \left( \prod_{i=1}^I f_{\it obs}(x_{j i} |\mu)
+        \right) \,
+        \pi( \mu ) \; d\mu. 
+\end{eqnarray}
+  Alternatively, if gene $j$ is DE, the 
+data ${\bf x}_j = ( {\bf x}_{j 1}, {\bf x}_{j 2})$ 
+ are governed by the distribution 
+ \begin{eqnarray}
+ \label{eq:f1}
+ f_1( {\bf x}_j ) = f_0( {\bf x}_{j 1} ) \, f_0( {\bf x}_{j 2} )
+ \end{eqnarray}
+owing to the fact that different mean values govern the different
+subsets ${\bf x}_{j 1}$ and ${\bf x}_{j 2}$ of samples.   
+The marginal distribution of the data becomes
+\begin{eqnarray}
+\label{eq:marg}
+p f_1({\bf x}_j) + (1-p) f_0({\bf x}_j).
+\end{eqnarray}
+With estimates of $p$, $f_0$, and $f_1$, 
+ the posterior probability of differential expression  is
+calculated by Bayes' rule as
+\begin{eqnarray}
+\label{eq:postprob}
+\frac{p \; f_1( {\bf x}_j )}
+{p \; f_1({\bf x}_j) + (1-p) \; f_0({\bf x}_j)}.
+\end{eqnarray}
+
+To review, the distribution of data involves an observation component,
+a component describing variation of mean expression $\mu_j$, and a
+discrete mixing parameter $p$ governing the proportion of genes differentially
+expressed between conditions.  The first two pieces combine to form a key
+predictive distribution $f_0(\cdot)$ (see (\ref{eq:f0})), which enters
+both the marginal distribution of data (\ref{eq:marg}) and the
+posterior probability of differential expression (\ref{eq:postprob}).
+
+\section{Multiple Conditions}
+
+Many studies take measurements from more than two conditions,
+and this leads us to consider more patterns of mean expression than
+simply DE and EE.  For example, with three conditions, there are five
+possible patterns among the means, including equivalent expression
+across the three conditions (1 pattern), altered expression in just one
+condition (3 patterns), and distinct expression in each condition 
+(1 pattern).  We view
+a pattern of expression for a gene $j$ as a grouping or clustering of
+conditions so that the mean level $\mu_j$ is the same for all
+conditions grouped together.  With microarrays from four cell
+conditions, there are 15 different patterns, in principle, but with
+extra information we might reduce the number of patterns to be
+considered.  We discuss an application in Section~\ref{appsec}
+with four conditions, but the
+context tells us to look only at a particular subset of four patterns.
+
+We always entertain the null pattern of equivalent expression among
+all conditions.  Consider $m$ additional patterns so that $m+1$
+distinct patterns of expression are possible for a data vector ${\bf
+  x}_j= (x_{j 1}, \ldots, x_{j I})$ on some gene $j$.  Generalizing
+(\ref{eq:marg}), ${\bf x}_j$ is governed by a mixture of the form
+\begin{eqnarray}
+\label{eq:bigmarg}
+\sum_{k=0}^{m} p_k f_k({\bf x}_j),
+\end{eqnarray}
+where $\{p_k\}$ are mixing proportions and component densities
+$\{f_k\}$ give the predictive distribution of measurements for each
+pattern of expression.  Consequently, the posterior probability of
+expression pattern $k$ is
+\begin{eqnarray}
+\label{eq:post}
+P(k | {\bf x}_j ) \propto p_k f_k({\bf x}_j).
+\end{eqnarray}
+
+The pattern-specific predictive density $f_k({\bf x}_j)$ may be
+reduced to a product of $f_0(\cdot)$, contributions from the different
+groups of conditions, just as in~(\ref{eq:f1}); this suggests that
+the multiple-condition problem is really no more difficult
+computationally than the two-condition problem except that there are
+more unknown mixing proportions $p_k$. Furthermore, it is this
+reduction that easily allows additional parametric assumptions to be
+considered within the EBarrays framework. In particular, three
+forms for $f_0$ are currently specified (see section \ref{modelsec}), 
+but other assumptions can be considered simply 
+by providing alternative forms for $f_0$.
+
+The posterior probabilities~(\ref{eq:post}) summarize our inference
+about expression patterns at each gene. They can be used to identify
+genes with altered expression in at least one condition, to order
+genes within conditions, to classify genes into distinct expression
+patterns and to estimate FDR.
+
+\section{The Three Models}
+\label{modelsec}
+We consider three particular specifications of the general mixture model
+described above. Each is determined by the choice of observation
+component and mean component, and each depends on a few additional
+parameters $\theta$ to be estimated from the data. As we will
+demonstrate, the model assumptions can be checked using diagnostic
+tools implemented in \ebpack{}, and additional models can be easily
+implemented.
+
+\subsection{The Gamma Gamma Model}
+\label{GG}
+In the Gamma-Gamma (GG) model, the observation component is a Gamma
+distribution having shape parameter $\alpha>0$ and a mean value
+$\mu_j$; thus, with scale parameter $\lambda_j= \alpha/\mu_j$,
+\begin{eqnarray*}
+f_{\it obs}(x|\mu_j) = \frac{ \lambda_j^\alpha x^{\alpha-1} 
+\exp\{ -\lambda_j x\} }{ \Gamma(\alpha) }
+\end{eqnarray*}
+for measurements $x>0$.  Note that the coefficient of variation (CV) in
+this distribution is $1/\sqrt{\alpha}$, taken to be constant across
+genes $j$.  Matched to this observation component is a marginal
+distribution $\pi(\mu_j)$, which we take to be an inverse Gamma.  More
+specifically, fixing $\alpha$, the quantity $\lambda_j=\alpha/\mu_j$ has
+a Gamma distribution with shape parameter $\alpha_0$ and scale
+parameter $\nu$.  Thus, three parameters are involved, $\theta =
+(\alpha, \alpha_0, \nu)$, and, upon integration, the key density
+$f_0(\cdot)$ has the form
+\begin{eqnarray}
+\label{eq:f0gg}
+f_0 (x_1, x_2, \ldots, x_I)=K \, 
+ \frac{ \left(\prod_{i=1}^{I} x_i \right)^{\alpha-1}}
+ {\left( \nu + \sum_{i=1}^{I} x_i  \right)^{I \alpha + \alpha_0}} ,
+\end{eqnarray}
+where
+\begin{eqnarray*}
+K=\frac{\nu^{\alpha_0} \, \Gamma(I \alpha + \alpha_0)}
+{\Gamma^{I}(\alpha) \, \Gamma(\alpha_0)} .
+\end{eqnarray*}
+
+\subsection{The Lognormal Normal Model}
+In the lognormal normal (LNN) model, the gene-specific mean $\mu_j$ is
+a mean for the log-transformed measurements, which are presumed to
+have a normal distribution with common variance $\sigma^2$.  Like the
+GG model, LNN also demonstrates a constant CV:
+$\sqrt{ \exp(\sigma^2) - 1 }$ on the raw scale.  A conjugate prior for
+the $\mu_j$ is normal with some underlying mean $\mu_0$ and variance
+$\tau_0^2$.  Integrating as in~(\ref{eq:f0}), the density $f_0(\cdot)$
+for an $n$-dimensional input becomes Gaussian with mean vector
+$\underline{\mu}_0 = (\mu_0, \mu_0, \ldots, \mu_0)^t$ and exchangeable
+covariance matrix
+\begin{eqnarray*}
+ {\bf \Sigma}_n = \left(\sigma^2 \right) {\bf I}_n + \left({\tau_0}^2 \right) 
+  {\bf M}_n ,
+\end{eqnarray*}
+where ${\bf I}_n$ is an $n \times n$ identity matrix and ${\bf M}_n$
+is an $n \times n$ matrix of ones.
+
+\subsection{The Lognormal Normal with Modified Variance Model}
+In the lognormal normal with modified variance (LNNMV) model, the log-transformed
+measurements are presumed to have a normal distribution
+with gene-specific mean $\mu_j$ and gene-specific variance $\sigma_j^2$. 
+With the same prior for the $\mu_j$ as in the LNN model, the density $f_0(\cdot)$ 
+for an $n$-dimensional input from gene $j$ becomes Gaussian with mean vector 
+$\underline{\mu}_0 = (\mu_0, \mu_0, \ldots, \mu_0)^t$ and exchangeable
+covariance matrix
+\begin{eqnarray*}
+ {\bf \Sigma}_n = \left(\sigma_j^2 \right) {\bf I}_n + \left({\tau_0}^2 \right) 
+  {\bf M}_n ,
+\end{eqnarray*} 
+Thus, only two model parameters are involved once the $\sigma_j^2$'s are estimated.
+
+In the special case of two conditions, we illustrate how to estimate the $\sigma_j^2$'s. 
+We assume that the prior distribution of $\sigma_j^2$ is the
+scaled inverse chi-square distribution with $\nu_0$ degrees of freedom 
+and scale parameter $\sigma_0$ and that $\mu_{j1}$ and
+$\mu_{j2}$, the gene-specific means in condition 1 and 2, are known. 
+Then the posterior distribution of $\sigma_j^2$ is also  
+the scaled inverse chi-square distribution with $n_1+n_2+\nu_0$ degrees of freedom
+and scale parameter 
+$$\sqrt{\frac{\nu_0\sigma_0^2+\sum_{i=1}^{n_1}(x_{ji}-\mu_{j1})^2+\sum_{i=1}^{n_2}(y_{ji}-\mu_{j2})^2}
+{n_1+n_2+\nu_0}},$$
+where $x_{ji}$ is the log-transformed measurement in condition 1, $j$ indexes gene, $i$ indexes sample; 
+$y_{ji}$ is the log-transformed measurement in condition 2; 
+$n_1$, $n_2$ are the numbers of samples in condition 1, 2 respectively. 
+By viewing the pooled sample variances 
+$$\tilde{\sigma}_j^2=\frac{\sum_{i=1}^{n_1}(x_{ji}-\bar{x}_j)^2+\sum_{i=1}^{n_2}(y_{ji}-\bar{y}_j)^2}
+{n_1+n_2-2}$$
+as a random sample from the prior distribution of $\sigma_j^2$, we can get
+$(\hat{\nu}_0,\hat{\sigma}_0^2)$, the estimate of $(\nu_0, \sigma_0^2)$ using the method of
+moments [\ref{itm:Shao}]. Then our estimate of $\sigma_j^2$ is 
+$$\hat{\sigma}_j^2= \frac{\hat{\nu}_0\hat{\sigma}_0^2+\sum_{i=1}^{n_1}(x_{ji}-\bar{x}_j)^2+
+\sum_{i=1}^{n_2}(y_{ji}-\bar{y}_j)^2}{n_1+n_2+\hat{\nu}_0-2},$$
+the posterior mean of $\sigma_j^2$ with $\nu_0$, $\sigma_0^2$, $\mu_{j1}$ and $\mu_{j2}$ substituted 
+by $\hat{\nu}_0$, $\hat{\sigma}_0^2$, $\bar{x}_j$ and $\bar{y}_j$, where 
+$\bar{x}_j=\frac{1}{n_1}\sum_{i=1}^{n_1}x_{ji}$ and 
+$\bar{y}_j=\frac{1}{n_2}\sum_{i=1}^{n_2}y_{ji}$. 
+
+The GG, LNN and LNNMV models characterize fluctuations in array data using a
+small number of parameters.  The GG and LNN models both involve the assumption of a
+constant CV.  The appropriateness of this assumption can be checked. The LNNMV 
+model relaxes this assumption, allowing for a gene specific variance estimate. Our 
+studies show little loss in efficiency with the LNNMV model, and we therefore generally 
+recommend its use over GG or LNN.  
+
+\section{EBarrays}
+\label{softsec}
+
+<<setup, echo=FALSE>>=
+options(width=50)
+@ 
+
+The \ebpack{} package can be loaded by
+
+<<init, echo=TRUE>>=
+library(EBarrays)
+@ 
+
+\noindent 
+The main user visible functions available in \ebpack{} are:
+\\
+
+\begin{tabular}{ll}
+  \code{ebPatterns}    & generates expression patterns\\
+  \code{emfit}         & fits the EB model using an EM algorithm  \\
+  \code{postprob}      & generates posterior probabilities for expression patterns \\
+  \code{crit.fun}      & find posterior probability threshold to control FDR\\
+  \code{checkCCV}      & diagnostic plot to check for constant coefficient of variation \\
+  \code{checkModel}    & generates diagnostic plots to check Gamma or Log-Normal assumption \\
+                       & on observation component \\
+  \code{plotMarginal}  & generates predictive marginal distribution from fitted model and \\
+                       & compares with estimated marginal (kernel) density of the data; \\ 
+                       & available for the GG and LNN models
+\end{tabular}
+\\
+
+\noindent
+The form of the parametric
+model is specified as an argument to \code{emfit}, which can be an
+object of formal class \code{``ebarraysFamily''}. These objects are
+built into \ebpack{} for the GG, LNN and LNNMV models described above. It is
+possible to create new instances, using the description given in
+\code{help("ebarraysFamily-class")}.
+\\
+
+The data can be supplied either as a matrix, or as an \code{``ExpressionSet''} object.
+It is expected that the data be normalized intensity values, with
+rows representing genes and columns representing chips.
+Furthermore, the data must be on the raw scale (not on a logarithmic scale). 
+All rows that contain at least one negative value are omitted
+from the analysis.
+\\
+
+The columns of the data matrix are assumed to be grouped into a few
+experimental conditions. The columns (arrays) within a group are
+assumed to be replicates obtained under the same experimental
+conditions, and thus to have the same mean expression level across
+arrays for each gene. This information is usually contained in the \\
+\code{``phenoData''} from an \code{``ExpressionSet''} object.
+\\
+
+As an example, consider a hypothetical dataset with $I=10$ arrays
+taken from two conditions --- five arrays in each condition ordered so
+that the first five columns contain data from the first condition. In
+this case, the phenodata can be represented as
+
+\begin{verbatim}
+1 1 1 1 1 2 2 2 2 2
+\end{verbatim}
+
+\noindent
+and there are two, possibly distinct, levels of expression for each
+gene and two potential patterns or hypotheses concerning its
+expression levels: $\mu_{j 1}=\mu_{j 2}$ and $\mu_{j 1} \neq \mu_{j
+  2}$. These patterns can be denoted by
+
+\begin{verbatim}
+1 1 1 1 1 1 1 1 1 1
+1 1 1 1 1 2 2 2 2 2
+\end{verbatim}
+
+\noindent
+representing, in this simple case, equivalent and differential
+expression for a gene respectively. The choice of admissible patterns
+is critical in defining the model we try to fit. \ebpack{} has a
+function \code{ebPatterns} that can read pattern definitions from an
+external file or a character vector that supplies this information in
+the above notation. For example, 
+
+<<readpattern>>=
+pattern <- ebPatterns(c("1, 1, 1, 1, 1, 1, 1, 1, 1, 1",
+                        "1, 1, 1, 1, 1, 2, 2, 2, 2, 2"))
+pattern
+@ 
+
+\noindent
+As discussed below, such patterns can be more complicated in general.
+For experiments with more than two groups, there can be many more
+patterns. Zeros can be used in this notation to identify arrays that
+are not used in model fitting or analysis, as we demonstrate below. 
+
+
+\section{Case Study}
+\label{appsec}
+
+
+In collaboration with Dr. M.N. Gould's laboratory in Madison, we have
+been investigating gene expression patterns of mammary epithelial
+cells in a rat model of breast cancer.  \ebpack{} contains part of a
+dataset from this study (5000 genes in 4 biological conditions; 10
+arrays total) to illustrate the mixture model calculations.
+For details on the full data set and analysis, see
+Kendziorski {\it et al}. (2003). The data can be read in by
+
+<<readdata>>=
+data(gould)
+@
+
+The experimental information on this data are as follows: in column
+order, there is one sample in condition 1, two samples in condition
+2, five samples in condition 3, and two samples in condition 4:
+
+\begin{verbatim}
+1 2 2 3 3 3 3 3 4 4
+\end{verbatim}
+
+\noindent
+Before we proceed with the analysis, we need to tell \ebpack{} what
+patterns of expression will be considered in the analysis.  
+Recall that 15 patterns are possible.  Let
+us first ignore conditions 3 and 4 and compare conditions 1 and 2.
+There are two possible expression patterns ($\mu_{Cond1}=\mu_{Cond2}$
+and $\mu_{Cond1} \neq \mu_{Cond2}$). This information can be entered
+as character strings, or they could also be read from a {\it
+  patternfile} which contains the following lines:
+
+\begin{verbatim}
+1 1 1 0 0 0 0 0 0 0 
+1 2 2 0 0 0 0 0 0 0 
+\end{verbatim}
+
+\noindent
+A zero column indicates that the data in that condition are not
+considered in the analysis. The patterns are entered as
+
+
+<<read2patterns>>=
+pattern <- ebPatterns(c("1,1,1,0,0,0,0,0,0,0","1,2,2,0,0,0,0,0,0,0"))
+
+pattern
+@ 
+
+\noindent
+An alternative approach would be to define a new data matrix
+containing intensities from conditions 1 and 2 only and define the
+associated patterns.
+
+\begin{verbatim}
+1 1 1
+1 2 2 
+\end{verbatim}
+
+\noindent
+This may be useful in some cases, but in general we recommend
+importing the full data matrix and defining the pattern matrix as a $2
+\times 10$ matrix with the last seven columns set to zero.  Doing so
+facilitates comparisons of results among different analyses since
+certain attributes of the data, such as the number of genes that are
+positive across each condition, do not change.
+\\
+
+The function \code{emfit} can be used to fit the GG, LNN or LNNMV model. 
+Posterior probabilities can then be obtained using \code{postprob}.  The
+approach is illustrated below. Output is shown for 10 iterations.  
+
+<<emfit>>=
+
+gg.em.out <- emfit(gould, family = "GG", hypotheses = pattern, 
+                   num.iter = 10)
+gg.em.out
+
+gg.post.out <- postprob(gg.em.out, gould)$pattern
+
+gg.threshold <- crit.fun(gg.post.out[,1], 0.05)
+
+gg.threshold
+
+sum(gg.post.out[,2] > gg.threshold)
+
+lnn.em.out <- emfit(gould, family = "LNN", hypotheses = pattern, 
+                    num.iter = 10)
+lnn.em.out
+
+lnn.post.out <- postprob(lnn.em.out, gould)$pattern
+
+lnn.threshold <- crit.fun(lnn.post.out[,1], 0.05)
+
+lnn.threshold
+
+sum(lnn.post.out[,2] > lnn.threshold)
+
+lnnmv.em.out <- emfit(gould, family = "LNNMV", hypotheses = pattern, 
+                      groupid = c(1,2,2,0,0,0,0,0,0,0), num.iter = 10)
+lnnmv.em.out
+
+lnnmv.post.out <- postprob(lnnmv.em.out, gould, 
+                           groupid = c(1,2,2,0,0,0,0,0,0,0))$pattern
+
+lnnmv.threshold <- crit.fun(lnnmv.post.out[,1], 0.05)
+
+lnnmv.threshold
+
+sum(lnnmv.post.out[,2] > lnnmv.threshold)
+
+sum(gg.post.out[,2] > gg.threshold & lnn.post.out[,2] > lnn.threshold)
+
+sum(gg.post.out[,2] > gg.threshold & lnnmv.post.out[,2] > lnnmv.threshold)
+
+sum(lnn.post.out[,2] > lnn.threshold & lnnmv.post.out[,2] > lnnmv.threshold)
+
+sum(gg.post.out[,2] > gg.threshold & lnn.post.out[,2] > lnn.threshold
+    & lnnmv.post.out[,2] > lnnmv.threshold)
+
+@
+
+The posterior probabilities can be used as described in Newton {\it et al.}
+(2004) to create a list of genes with a target FDR. Using 0.05 as the target
+FDR, 3, 12 and 14 genes are identified as most likely DE 
+via the GG model, the LNN model and the LNNMV model, respectively. 
+Note that all 3 DE genes identified by the GG model are
+also identified by LNN; 2 genes are identified as DE by both GG and LNNMV;
+7 genes are identified as DE by both LNN and LNNMV; and all three methods 
+agrees on 2 genes being DE. Further diagnostics are required to
+investigate model fit and to consider the genes identified as DE
+by only one or 2 models. 
+\\
+
+When using the GG or LNN model, the function \code{checkCCV} can be 
+used to see if there is any relationship between the mean expression level 
+and the CV.  Another way to assess the goodness 
+of the parametric model is to look at Gamma or Normal QQ plots for 
+subsets of the data sharing common empirical mean intensities. 
+For this, we can choose a small number of locations for the mean value, 
+and look at the QQ plots for the subset
+of measured intensities in a small window around each of those
+locations. Since the LNNMV model assumes a log-normal observation component, 
+this diagnostic is suggested when using LNNMV model as well. 
+A third diagnostic consists of plotting the marginal distributions of each 
+model and comparing with the empirical distribution to further assess model
+fit. This diagnostic is designed especially for the GG and LNN models since 
+their marginal distributions are not gene specific.  
+Finally, \code{checkVarsQQ} and \code{checkVarsMar} are two diagnostics 
+used to check the assumption of a scaled inverse chi-square prior on 
+$\sigma_j^2$, made in the LNNMV model. \code{checkVarsQQ} generates a QQ plot 
+of the quantiles of gene specific sample variances against the quantiles of 
+the scaled inverse chi-square distribution with parameters estimated 
+from data. \code{checkVarsMar} plots
+the density histogram of gene specific sample variances and the density 
+of the scaled inverse chi-square distribution with parameters estimated 
+from the data.
+\\
+
+
+Figure \ref{fig:ccv} shows that the assumption of a constant
+coefficient of variation is reasonable for the small data set
+considered here.  If necessary, the data could be transformed based on
+this cv plot prior to analysis.  Figure \ref{fig:qq-gg} shows a
+second diagnostic plot for nine subsets of $nb=50$ genes spanning the
+range of mean expression.  Shown are {\em qq} plots against the
+best-fitting Gamma distribution.  The fit is reasonable here.  Note
+that we only expect these {\em qq} plots to hold for equivalently
+expressed genes, so some violation is expected in general.  Figures
+\ref{fig:qq-lnn} and \ref{fig:qq-lnnmv} show the same diagnostics 
+for the LNN model and the LNNMV model, respectively. 
+A visual comparison between figure \ref{fig:marg-gg} and figure 
+\ref{fig:marg-lnn} suggests that the LNN model provides a better fit.
+Finally, figure \ref{fig:varsqq-lnnmv} and figure \ref{fig:varsmarg-lnnmv} 
+provide checks for the assumption of a scaled inverse chi-square prior
+on gene specific variances.  The LNN model seems most appropriate here. 
+Figure \ref{fig:varsmarg-lnnmv} demonstrates that the assumptions of LNNMV
+are not satisfied, perhaps due to the small sample size ($n=3$) 
+used to estimate each gene specific variance. 
+\\ 
+
+A nice feature of \ebpack{} is that comparisons among more than two
+groups can be carried out simply by changing the pattern matrix.  For
+the four conditions, there are 15 possible expression patterns;
+however, for this case study, four were of most interest.  The null
+pattern (pattern 1) consists of equivalent expression across the four
+conditions.  The three other patterns allow for differential
+expression.  Differential expression in condition 1 only is specified
+in pattern 2; DE in condition 4 only is specified in pattern 4.
+\\
+
+The pattern matrix for the four group analysis is now given by
+
+\begin{verbatim}
+1 1 1 1 1 1 1 1 1 1
+1 2 2 2 2 2 2 2 2 2
+1 2 2 1 1 1 1 1 2 2
+1 1 1 1 1 1 1 1 2 2
+\end{verbatim}
+
+<<>>=
+pattern4 <- ebPatterns(c("1, 1, 1, 1, 1, 1, 1, 1, 1, 1", 
+                         "1, 2, 2, 2, 2, 2, 2, 2, 2, 2", 
+                         "1,2,2,1,1,1,1,1,2,2", 
+                         "1,1,1,1,1,1,1,1,2,2"))
+pattern4
+@ 
+
+\code{emfit} and \code{postprob} are called as before.
+
+<<fourgroups>>=
+gg4.em.out <- emfit(gould, family = "GG", pattern4, 
+                    num.iter = 10)
+
+gg4.em.out
+
+gg4.post.out <- postprob(gg4.em.out, gould)$pattern
+
+gg4.threshold2 <- crit.fun(1-gg4.post.out[,2], 0.05)
+
+sum(gg4.post.out[,2] > gg4.threshold2)
+
+lnn4.em.out <- emfit(gould, family="LNN", pattern4,
+                     num.iter = 10)
+
+lnn4.em.out
+
+lnn4.post.out <- postprob(lnn4.em.out, gould)$pattern
+
+lnn4.threshold2 <- crit.fun(1-lnn4.post.out[,2], 0.05)
+
+sum(lnn4.post.out[,2] > lnn4.threshold2)
+
+lnnmv4.em.out <- emfit(gould, family="LNNMV", pattern4,
+                       groupid = c(1,2,2,3,3,3,3,3,4,4), num.iter = 10)
+
+lnnmv4.em.out
+
+lnnmv4.post.out <- postprob(lnnmv4.em.out, gould,
+                            groupid = c(1,2,2,3,3,3,3,3,4,4))$pattern
+
+lnnmv4.threshold2 <- crit.fun(1-lnnmv4.post.out[,2], 0.05)
+
+sum(lnnmv4.post.out[,2] > lnnmv4.threshold2)
+
+sum(gg4.post.out[,2] > gg4.threshold2 & lnn4.post.out[,2] > lnn4.threshold2)
+
+sum(gg4.post.out[,2] > gg4.threshold2 & lnnmv4.post.out[,2] > lnnmv4.threshold2)
+
+sum(lnn4.post.out[,2] >  lnn4.threshold2 & lnnmv4.post.out[,2] > lnnmv4.threshold2)
+
+sum(gg4.post.out[,2] > gg4.threshold2 & lnn4.post.out[,2] > lnn4.threshold2 
+    & lnnmv4.post.out[,2] > lnnmv4.threshold2) 
+@ 
+
+The component pattern from postprob is now a matrix with number of rows 
+equal to the number of genes and number of columns equal to 4 (one for each
+pattern considered). A brief look at the output matrices shows that 40
+genes are identified as being in pattern 2 using 0.05 as the target FDR
+under the GG model, 45 under the LNN model and 76 under the LNNMV model;
+34 of the 40 genes identified by GG are also identified by LNN. 25 genes
+are commonly identified by GG and LNNMV. 29 genes are commonly identified
+by LNN and LNNMV. 22 genes are identified by all the three models.
+Figures \ref{fig:marg-gg4} and
+\ref{fig:marg-lnn4} show marginal plots similar to Figures
+\ref{fig:marg-gg} and \ref{fig:marg-lnn}. Figure \ref{fig:varsmarg-lnnmv4}
+shows a plot similar to figure \ref{fig:varsmarg-lnnmv}. Here the violation 
+of assumptions made in the LNNMV model is not as severe. 
+
+\section{Appendix: Comparison with the older versions of \ebpack{}}
+Major changes in this version include:
+\begin{enumerate}
+\item A new model LNNMV has been added, as described here. 
+\item Ordered patterns can be considered. Instead of only considering 
+$\mu_{j1}\neq \mu_{j2}$, $\mu_{j1}>\mu_{j2}$ and $\mu_{j1}<\mu_{j2}$ 
+can also be considered in the current version. For details, 
+please refer to the help page for \code{ebPatterns} and 
+Yuan and Kendziorski (2006).
+\item Both clustering and DE identification can be done simultaneously 
+by specifying the number of clusters in emfit. For details, 
+please refer to the help page for \code{emfit} and Yuan and Kendziorski (2006).
+\end{enumerate}
+
+\begin{figure}[htbp]
+  \centering
+
+<<checkccv,fig=TRUE>>=
+checkCCV(gould[,1:3])
+@    
+  \caption{Coefficient of variation (CV) as a function of the mean.}
+  \label{fig:ccv}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+<<qqplotgamma,fig=TRUE>>=
+print(checkModel(gould, gg.em.out, model = "gamma", nb = 50))
+@  
+  \caption{Gamma qq plot.}
+  \label{fig:qq-gg}
+\end{figure}
+  
+\begin{figure}[htbp]
+  \centering
+<<qqplotlnorm,fig=TRUE>>=
+print(checkModel(gould, lnn.em.out, model = "lognormal", nb = 50))
+@  
+  \caption{Normal qq plot.}
+  \label{fig:qq-lnn}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+<<qqplotlnnmv,fig=TRUE>>=
+print(checkModel(gould, lnnmv.em.out, model = "lnnmv", nb = 50,
+		 groupid = c(1,2,2,0,0,0,0,0,0,0)))
+@  
+  \caption{Normal qq plot.}
+  \label{fig:qq-lnnmv}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+<<ggmarg,fig=TRUE>>=
+print(plotMarginal(gg.em.out, gould))
+@ 
+  \caption{Empirical and theoretical marginal densities of log 
+    expressions for the Gamma-Gamma model.}
+  \label{fig:marg-gg}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+<<lnnmarg,fig=TRUE>>=
+print(plotMarginal(lnn.em.out, gould))
+@ 
+  \caption{Empirical and theoretical marginal densities of log 
+    expressions for the Lognormal-Normal model}
+  \label{fig:marg-lnn}
+\end{figure}
+  
+\begin{figure}[htbp]
+  \centering
+<<varsqqplotlnnmv,fig=TRUE>>=
+print(checkVarsQQ(gould, groupid = c(1,2,2,0,0,0,0,0,0,0)))
+@  
+  \caption{Scaled inverse chi-square qq plot.}
+  \label{fig:varsqq-lnnmv}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+
+<<varsmarglnnmv,fig=TRUE>>=
+print(checkVarsMar(gould, groupid = c(1,2,2,0,0,0,0,0,0,0), 
+                   nint=2000, xlim=c(-0.1, 0.5)))
+@  
+  \caption{Density histogram of gene specific sample variances and 
+  the scaled inverse chi-square density plot (red line).}
+  \label{fig:varsmarg-lnnmv}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+
+<<gg4marg,fig=TRUE>>=
+print(plotMarginal(gg4.em.out, data = gould))
+@ 
+
+  \caption{Marginal densities for Gamma-Gamma model}
+  \label{fig:marg-gg4}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+
+<<lnn4marg,fig=TRUE>>=
+print(plotMarginal(lnn4.em.out, data = gould))
+@ 
+
+  \caption{Marginal densities for Lognormal-Normal model}
+  \label{fig:marg-lnn4}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+
+<<varsmarglnnmv4,fig=TRUE>>=
+print(checkVarsMar(gould, groupid = c(1,2,2,3,3,3,3,3,4,4), 
+      	           nint=2000, xlim=c(-0.1, 0.5)))
+@ 
+
+  \caption{Density histogram of gene specific sample variances and 
+  the scaled inverse chi-square density plot (red line).}
+  \label{fig:varsmarg-lnnmv4}
+\end{figure}
+
+\section{References}
+
+\begin{enumerate}
+
+\item Kendziorski, C.M., Newton, M.A., Lan, H., Gould, M.N. (2003).
+On parametric empirical Bayes methods for comparing multiple groups
+using replicated gene expression profiles. 
+{\it Statistics in Medicine}, 22:3899-3914.
+
+\item Newton, M.A., Kendziorski, C.M., Richmond, C.S., Blattner, F.R. (2001).
+On differential variability of expression ratios:
+Improving statistical inference about gene expression changes
+from microarray data.  
+{\it Journal of Computational Biology}, 8:37-52.
+
+\item Newton, M.A. and Kendziorski, C.M.
+Parametric Empirical Bayes Methods for Microarrays in
+{\it The analysis of gene expression data: methods and software}.
+Eds. G. Parmigiani, E.S. Garrett, R. Irizarry and S.L. Zeger, New York: Springer Verlag, 2003.
+
+\item Newton, M.A., Noueiry, A.,
+Sarkar, D., and Ahlquist, P. (2004). Detecting differential gene expression
+with a semiparametric hierarchical mixture model. {\it Biostatistics} {\bf 5},
+155-176.
+
+\item \label{itm:Shao} Shao, J. (1999) {\it Mathematical Statistics}. Springer-Verlag, New York.  
+
+\item Yuan, M. and Kendziorski, C. (2006), A unified approach for simultaneous gene 
+clustering and differential expression identification, {\it Biometrics}, 62(4), 1089-1098.
+\end{enumerate}
+\end{document}

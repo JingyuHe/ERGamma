@@ -1,0 +1,33 @@
+useDynLib(gcrma)
+
+importMethodsFrom(affy, cdfName, indexProbes, intensity, mm, pm,
+                  "pm<-", pmindex, probeNames)
+
+importMethodsFrom(Biobase, exprs, "exprs<-", featureNames, pData)
+
+importFrom(affy, AllButCelsForReadAffy, checkValidFilenames,
+           cleancdfname, read.probematrix, rma, xy2indices)
+
+importFrom(affyio, read.celfile.header)
+
+importFrom(Biobase, testBioCConnection)
+
+importFrom(BiocManager, repositories)
+
+importFrom(XVector, subseq, "subseq<-")
+importClassesFrom(Biostrings, "DNAStringSet")
+importFrom(Biostrings, DNAStringSet, complement)
+importMethodsFrom(Biostrings, "subseq<-", as.character)
+
+importFrom(graphics, matplot)
+
+importFrom(methods, new)
+
+importFrom(splines, ns)
+
+importFrom(stats, lm, loess, mad, median, predict, quantile, runmed)
+
+importFrom(utils, available.packages, contrib.url, data,
+           install.packages)
+
+export(average.for.PAV, base.profiles, base.profiles.mm, base.profiles.nc, bg.adjust.affinities, bg.adjust.constant, bg.adjust.fullmodel, bg.adjust.gcrma, bg.adjust.mm, bg.adjust.optical, bg.parameters.ns, check.probes, compute.affinities, compute.affinities2, compute.affinities.local, compute.affinity.coef, fast.bkg, gcrma, gcrma.bg.transformation, gcrma.bg.transformation.fast, gcrma.engine, gcrma.engine2, getCDF, getProbePackage, just.gcrma, justGCRMA, left.sigma, mem.bkg, PAV, plotBaseProfiles,GSB.adj)

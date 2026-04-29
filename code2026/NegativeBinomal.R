@@ -1,3 +1,6 @@
+local_lib <- file.path(getwd(), "r-lib")
+if (dir.exists(local_lib)) .libPaths(c(local_lib, .libPaths()))
+
 library(GIGrvg)
 library(BayesLogit) 
 library(mvtnorm)

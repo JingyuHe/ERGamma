@@ -1,0 +1,12 @@
+ 
+**************************************************
+*              2.12 SERIES NEWS                   *
+**************************************************
+Removed unused random seed.
+
+Change in GSB.adjust: probes with intensity at lower bounds are no
+longer adjusted in GSB.adjust.
+
+Reference: Comparative analysis of microarray normalization procedures:
+effects on reverse engineering gene networks
+Lim et al, Bioinformatics 2007 Vol23(13):i282

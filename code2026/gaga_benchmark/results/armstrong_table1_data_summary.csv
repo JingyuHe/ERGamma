@@ -1,0 +1,2 @@
+"data","source_file","transform","exclude_last_mll","n_genes","n_samples","n_all","n_mll","min_raw","max_raw","min_used","max_used","reps","methods"
+"orange_full","/Users/jingyuhe/Dropbox/ERGamma/code2026/gaga_benchmark/data/MLL_orange_12533.tab","clip",TRUE,12533,42,24,18,-10196,58380,1,58380,20,"GaGa,MiGaGa2,limma_BH"

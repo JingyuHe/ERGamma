@@ -1,0 +1,25 @@
+Package: gcrma
+Title: Background Adjustment Using Sequence Information
+Version: 2.83.0
+Author: Jean(ZHIJIN) Wu, Rafael Irizarry
+	with contributions from
+	James MacDonald <jmacdon@med.umich.edu>	
+	Jeff Gentry
+Description: Background adjustment using sequence information
+Maintainer: Z. Wu <zwu@stat.brown.edu>
+License: LGPL
+Depends: R (>= 2.6.0), affy (>= 1.23.2), graphics, methods, stats,
+        utils
+Imports: Biobase, affy (>= 1.23.2), affyio (>= 1.13.3), XVector,
+        Biostrings (>= 2.11.32), splines, BiocManager
+Suggests: affydata, tools, splines, hgu95av2cdf, hgu95av2probe
+biocViews: Microarray, OneChannel, Preprocessing
+git_url: https://git.bioconductor.org/packages/gcrma
+git_branch: devel
+git_last_commit: 2a7d479
+git_last_commit_date: 2025-10-29
+Repository: Bioconductor 3.23
+Date/Publication: 2025-10-31
+NeedsCompilation: yes
+Packaged: 2025-10-31 21:53:26 UTC; biocbuild
+Built: R 4.6.0; aarch64-apple-darwin25.4.0; 2026-04-28 15:06:02 UTC; unix

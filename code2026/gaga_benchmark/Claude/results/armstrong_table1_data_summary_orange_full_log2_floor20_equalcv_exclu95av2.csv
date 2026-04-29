@@ -1,0 +1,2 @@
+"data","source_file","transform","exclude_u95av2","equalcv","n_genes","n_samples","n_all","n_mll","reps","methods"
+"orange_full","/sessions/awesome-eager-hamilton/mnt/ERGamma/code2026/gaga_benchmark/data/MLL_orange_12533.tab","log2_floor20",TRUE,TRUE,12533,42,24,18,2,"GaGa,MiGaGa2,limma_BH"

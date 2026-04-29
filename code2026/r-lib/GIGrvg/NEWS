@@ -1,0 +1,52 @@
+Version 0.8: 2023-03-22
+
+	- updated references to papers
+
+	- internal:
+	  register native symbols in DLL
+	  
+
+Version 0.7: 2022-05-05
+
+	- fixed issue with small value of parameters chi and psi
+
+	- rgig(n=0, ...) now returns numeric(0) as do R core RNGs like rnorm(n=0).
+
+
+Version 0.6: 2022-04-26
+
+	- internal:
+	  replaced deprecated S-compatibility macro in C sources
+
+
+Version 0.5: 2017-06-09
+
+	- registered native routines
+	
+
+Version 0.4: 2015-07-17
+
+	- fixed some issues in DESCRIPTION
+
+
+Version 0.3: 2014-05-12
+
+	- Created new low level C function do_rgig() which 
+	  is also callable from other packages. 
+	  This function 
+	   (a) does NOT take care of getting/setting RNGstate, and
+	   (b) takes int, double, double, double instead of 
+	       SEXP, SEXP, SEXP, SEXP as arguments. 
+	  Please use do_rgig() only if you manually get/set RNGstate
+	  within the C-function calling it.
+
+
+Version 0.2: 2014-02-06
+
+	- Made C function rgig() callable from other packages
+	  (see doc/README).
+
+
+Version 0.1: 2013-05-27
+
+	- First public release.

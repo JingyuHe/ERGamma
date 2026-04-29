@@ -1,0 +1,2 @@
+"data","transform","n_genes","n_samples","n_all","n_mll","ga_de","gaga_probpat_de","migaga_probpat_de","fit_method","n_prior"
+"schliep_filtered","log",2194,42,24,18,347,0.429188062008177,0.541944037397634,"quickEM",10000

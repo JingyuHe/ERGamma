@@ -1,0 +1,12 @@
+crit.fun                Find posterior probability threshold to control
+                        FDR
+ebarraysFamily-class    Class of Families to be used in the EBarrays
+                        package
+ebplots                 Various plotting routines in the EBarrays
+                        package
+emfit                   Implements EM algorithm for gene expression
+                        mixture model
+gould                   A dataset of class matrix
+postprob                Calculates posterior probabilities for
+                        expression patterns
+utilities               Utility functions for the EBarrays package

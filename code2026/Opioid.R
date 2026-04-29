@@ -3,6 +3,9 @@ source("sampling.R")
 library(ggplot2)
 library(reshape2)
 
+default_N_draw = as.integer(Sys.getenv("PIG_N_DRAW", "1000"))
+default_N_truncations = as.integer(Sys.getenv("PIG_N_TRUNCATIONS", "300"))
+default_N_pred = as.integer(Sys.getenv("PIG_N_PRED", "1000"))
 
 # opioid data ---------------
 OverdoseDeaths = read.csv("OverdoseDeaths.csv", header=T, stringsAsFactors = F, colClasses = c("character", "character", "integer", "character", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric"))
@@ -31,21 +34,21 @@ opioid_alpha =function(data, e=1/6, v=1, N_draw = 1000, N_truncations=500)
   beta = e/v
   tau = e^2/v
   
-  alpha_sample = Gibbs_MD(data, tau, beta, niter=2*N_draw)
+  alpha_sample = Gibbs_MD(data, tau, beta, niter=2*N_draw, N_truncations=N_truncations)
   return(alpha_sample[1:N_draw + N_draw, ])
 }
 
 
 
 # sampling alpha ---------
-alpha_1 = opioid_alpha(data,v=1)
-alpha_5 = opioid_alpha(data,v=5)
-alpha_50 = opioid_alpha(data,v=50)
+alpha_1 = opioid_alpha(data,v=1,N_draw=default_N_draw,N_truncations=default_N_truncations)
+alpha_5 = opioid_alpha(data,v=5,N_draw=default_N_draw,N_truncations=default_N_truncations)
+alpha_50 = opioid_alpha(data,v=50,N_draw=default_N_draw,N_truncations=default_N_truncations)
 
 names = colnames(data)
-alpha_sample = rbind(data.frame(alpha = c(alpha_1), v = 1, drug=rep(names,each=1000)),
-                     data.frame(alpha = c(alpha_5), v = 5, drug=rep(names,each=1000)),
-                     data.frame(alpha = c(alpha_50), v = 50, drug=rep(names,each=1000)))
+alpha_sample = rbind(data.frame(alpha = c(alpha_1), v = 1, drug=rep(names,each=nrow(alpha_1))),
+                     data.frame(alpha = c(alpha_5), v = 5, drug=rep(names,each=nrow(alpha_5))),
+                     data.frame(alpha = c(alpha_50), v = 50, drug=rep(names,each=nrow(alpha_50))))
 alpha_sample$v = paste0("prior_var=",alpha_sample$v)
 
 p = ggplot(alpha_sample,aes(x=alpha,fill=drug)) + 
@@ -59,16 +62,16 @@ print(p)
 dev.off()
 
 
-alpha_e1 = opioid_alpha(data,e=1)
-alpha_e2 = opioid_alpha(data,e=2)
-alpha_e3 = opioid_alpha(data,e=3)
-alpha_e5 = opioid_alpha(data,e=5)
-alpha_e10 = opioid_alpha(data,e=10)
-alpha_e50 = opioid_alpha(data,e=50)
+alpha_e1 = opioid_alpha(data,e=1,N_draw=default_N_draw,N_truncations=default_N_truncations)
+alpha_e2 = opioid_alpha(data,e=2,N_draw=default_N_draw,N_truncations=default_N_truncations)
+alpha_e3 = opioid_alpha(data,e=3,N_draw=default_N_draw,N_truncations=default_N_truncations)
+alpha_e5 = opioid_alpha(data,e=5,N_draw=default_N_draw,N_truncations=default_N_truncations)
+alpha_e10 = opioid_alpha(data,e=10,N_draw=default_N_draw,N_truncations=default_N_truncations)
+alpha_e50 = opioid_alpha(data,e=50,N_draw=default_N_draw,N_truncations=default_N_truncations)
 
-alpha_sample2 = rbind(data.frame(alpha = c(alpha_e1), e=1, drug=rep(names,each=1000)),
-                     data.frame(alpha = c(alpha_e5), e=5, drug=rep(names,each=1000)),
-                     data.frame(alpha = c(alpha_e50), e=50, drug=rep(names,each=1000)))
+alpha_sample2 = rbind(data.frame(alpha = c(alpha_e1), e=1, drug=rep(names,each=nrow(alpha_e1))),
+                     data.frame(alpha = c(alpha_e5), e=5, drug=rep(names,each=nrow(alpha_e5))),
+                     data.frame(alpha = c(alpha_e50), e=50, drug=rep(names,each=nrow(alpha_e50))))
 alpha_sample2$e = paste0("prior_mean=",alpha_sample2$e)
 
 p2 = ggplot(alpha_sample2,aes(x=alpha,fill=drug)) + 
@@ -88,16 +91,16 @@ post_p_50 = NULL
 
 
 N_post_alpha = dim(alpha_e1)[1]
-for(i in 1:1000)
+for(i in 1:default_N_pred)
 {
   post_p_1 = rbind(post_p_1, rdirichlet(1, alpha_e1[sample(N_post_alpha,1),]))
   post_p_5 = rbind(post_p_5, rdirichlet(1, alpha_e5[sample(N_post_alpha,1),]))
   post_p_50 = rbind(post_p_50, rdirichlet(1, alpha_e50[sample(N_post_alpha,1),]))
 }
 
-post_p_sample = rbind(data.frame(p = c(post_p_1), e = 1, drug=rep(names,each=1000)),
-                     data.frame(p = c(post_p_5), e = 5, drug=rep(names,each=1000)),
-                     data.frame(p = c(post_p_50), e = 50, drug=rep(names,each=1000)))
+post_p_sample = rbind(data.frame(p = c(post_p_1), e = 1, drug=rep(names,each=default_N_pred)),
+                     data.frame(p = c(post_p_5), e = 5, drug=rep(names,each=default_N_pred)),
+                     data.frame(p = c(post_p_50), e = 50, drug=rep(names,each=default_N_pred)))
 post_p_sample$e = paste0("prior_mean=",post_p_sample$e)
   
 p3 = ggplot(post_p_sample,aes(x=p,fill=drug)) + 
@@ -109,4 +112,3 @@ p3 = ggplot(post_p_sample,aes(x=p,fill=drug)) +
 pdf("opioid_predictive_new.pdf", height = 9, width = 9)
 print(p3)
 dev.off()
-

@@ -1,0 +1,7 @@
+GenomeDescription-class
+                        GenomeDescription objects
+rankSeqlevels           Assign sequence IDs to sequence names
+seqinfo                 Accessing/modifying sequence information
+Seqinfo-class           Seqinfo objects
+seqlevelsInUse          Get the sequence levels in use
+sortSeqlevels           Sort the sequence levels of an object

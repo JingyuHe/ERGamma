@@ -1,0 +1,4 @@
+"method","n_de","true_de","fdr","power","elapsed"
+"GaGa_quickEM",4,5,0,0.8,0.00600000000000001
+"MiGaGa2_quickEM",4,5,0,0.8,0.017
+"limma_or_ttest_BH",4,5,0,0.8,NA
