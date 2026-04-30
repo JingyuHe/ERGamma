@@ -1,0 +1,17 @@
+"scenario","method","alpha_bin","metric","n","mean","sd","se"
+"S1_benign","PIG_MCMC","<1","mae_pp0",0,NA,NA,NA
+"S1_benign","PIG_MCMC",">=10","mae_pp0",50,0.00640748875340766,0.000979546048253596,0.000138528730640921
+"S1_benign","PIG_MCMC","1-3","mae_pp0",0,NA,NA,NA
+"S1_benign","PIG_MCMC","3-10","mae_pp0",5,0.00502925831076015,0.00729649836122098,0.00326309326668118
+"S1_benign","Stirling","<1","mae_pp0",0,NA,NA,NA
+"S1_benign","Stirling",">=10","mae_pp0",50,8.93189806332925e-07,9.09346890658976e-08,1.28601070567173e-08
+"S1_benign","Stirling","1-3","mae_pp0",0,NA,NA,NA
+"S1_benign","Stirling","3-10","mae_pp0",5,6.99378686135344e-06,4.48115635675719e-06,2.00403404630287e-06
+"S1_benign","PIG_MCMC","<1","q95_abs_pp0",0,NA,NA,NA
+"S1_benign","PIG_MCMC",">=10","q95_abs_pp0",50,0.0292912515515097,0.00761062158667916,0.00107630442659711
+"S1_benign","PIG_MCMC","1-3","q95_abs_pp0",0,NA,NA,NA
+"S1_benign","PIG_MCMC","3-10","q95_abs_pp0",5,0.00502925831076015,0.00729649836122098,0.00326309326668118
+"S1_benign","Stirling","<1","q95_abs_pp0",0,NA,NA,NA
+"S1_benign","Stirling",">=10","q95_abs_pp0",50,2.9164825248199e-06,3.01501172535998e-07,4.26387047271798e-08
+"S1_benign","Stirling","1-3","q95_abs_pp0",0,NA,NA,NA
+"S1_benign","Stirling","3-10","q95_abs_pp0",5,6.99378686135344e-06,4.48115635675719e-06,2.00403404630287e-06

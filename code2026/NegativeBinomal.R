@@ -8,6 +8,12 @@ source("sampling.R")
 
 
 
+log1pexp = function(x)
+{
+  ifelse(x > 0, x + log1p(exp(-x)), log1p(exp(x)))
+}
+
+
 # MCMC
 
 NBR_mcmc = function(X, y, B=1000, burn=200, N_truncations=300, sigma=1, alpha=2, kappa=1)
@@ -19,7 +25,7 @@ NBR_mcmc = function(X, y, B=1000, burn=200, N_truncations=300, sigma=1, alpha=2,
   psi_array = rep(0, B)
   
   # parameters
-  beta = rnorm(k,s=sigma)
+  beta = rep(0, k)
   psi = rgamma(1,shape=2,scale = 1) # gamma prior for negative binomial number of "failures"
   
   
@@ -28,21 +34,26 @@ NBR_mcmc = function(X, y, B=1000, burn=200, N_truncations=300, sigma=1, alpha=2,
     if(i %% 200 == 0) 
       cat("sampling ", i, "\n")
     
-    tau = sapply(y+psi, function(x) rgamma(1,shape=x))
+    # Partially collapsed update for psi/r.  The Polya-Gamma variables are
+    # integrated out in this step; conditioning on them would add a
+    # p_PG(xi | y + psi, 0) factor that depends on psi.
+    tau = rgamma(N, shape=y+psi, rate=1)
     xi = rPIG_ERGamma(N, psi, N_truncations)
-    Xbeta = X %*% beta
-    
-    omega = diag(N)
-    for(j in 1:N) omega[j,j] = rpg(1, (y+psi)[j], Xbeta[j])
-    Xomega = t(X) %*% omega
-    
-    V = solve(diag(k)/sigma^2 + Xomega %*% X) 
-    m = V %*% Xomega %*% ((y-psi)/2/diag(omega))
-    beta = t(rmvnorm(1,mean=m,sigma = V))
-    
+    Xbeta = drop(X %*% beta)
     a = sum(xi)
-    b = N*(-0.1159315) + sum(log(tau) - Xbeta/2)
-    psi = rH(alpha+N, a, b+kappa)
+    b = N*(-digamma(1)) + sum(log(tau)) - sum(log1pexp(Xbeta)) - kappa
+    psi_new = rH(alpha+N, a, b)
+    if(!is.finite(psi_new) || psi_new <= 0)
+      stop("PTN update for psi failed")
+    psi = psi_new
+    
+    # Conditional beta update with fresh Polya-Gamma variables at the new psi.
+    omega = sapply(1:N, function(j) rpg(1, y[j]+psi, Xbeta[j]))
+    XomegaX = t(X) %*% (X * omega)
+    
+    V = solve(diag(k)/sigma^2 + XomegaX) 
+    m = V %*% t(X) %*% ((y-psi)/2)
+    beta = drop(rmvnorm(1,mean=drop(m),sigma = V))
     
     if(i > burn)
     {
@@ -72,11 +83,14 @@ NBR2_mcmc = function(X, y, beta, B=1000,burn=200, N_truncations=300, sigma=1, al
     if(i %% 200 == 0) 
       cat("sampling ", i, "\n")
     
-    tau = sapply(y+psi, function(x) rgamma(1,shape=x))
+    tau = rgamma(N, shape=y+psi, rate=1)
     xi = rPIG_ERGamma(N, psi, N_truncations)
     a = sum(xi)
-    b = N*(-digamma(1)) + sum(log(tau) - log(1+exp(Xbeta)))
-    psi = rH(alpha+N, a, b+kappa)
+    b = N*(-digamma(1)) + sum(log(tau)) - sum(log1pexp(Xbeta)) - kappa
+    psi_new = rH(alpha+N, a, b)
+    if(!is.finite(psi_new) || psi_new <= 0)
+      stop("PTN update for psi failed")
+    psi = psi_new
     
     if(i > burn)
     {
@@ -106,7 +120,7 @@ y = sapply(p, function(x) rnbinom(1,size=psi,prob=x))
 
 dalpha=function(r)
 {
-  logL = sapply(r, function(x){-log(x)-N*lgamma(x) + sum(lgamma(y+x))-sum((y+x)*log(1+exp(Xbeta)))-500})
+  logL = sapply(r, function(x){-log(x)-N*lgamma(x) + sum(lgamma(y+x))-sum((y+x)*log1pexp(Xbeta))-500})
   return(exp(logL))
 }
 

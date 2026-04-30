@@ -1,0 +1,13 @@
+"scenario","method","metric","n","mean","sd","se"
+"S4_severe_stress","PIG_MCMC","mae_pp0",1,0.00423197995987424,NA,NA
+"S4_severe_stress","Stirling","mae_pp0",1,0.0644521487829603,NA,NA
+"S4_severe_stress","PIG_MCMC","rmse_pp0",1,0.012410640712166,NA,NA
+"S4_severe_stress","Stirling","rmse_pp0",1,0.225597205739938,NA,NA
+"S4_severe_stress","PIG_MCMC","q95_abs_pp0",1,0.0203169473582876,NA,NA
+"S4_severe_stress","Stirling","q95_abs_pp0",1,0.900574389065352,NA,NA
+"S4_severe_stress","PIG_MCMC","max_abs_pp0",1,0.0923579525452174,NA,NA
+"S4_severe_stress","Stirling","max_abs_pp0",1,0.901003709640808,NA,NA
+"S4_severe_stress","PIG_MCMC","spearman_score",1,0.987546809363004,NA,NA
+"S4_severe_stress","Stirling","spearman_score",1,0.935839507851039,NA,NA
+"S4_severe_stress","PIG_MCMC","pearson_score",1,0.965399271030087,NA,NA
+"S4_severe_stress","Stirling","pearson_score",1,0.20816923134072,NA,NA

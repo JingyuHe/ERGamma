@@ -1,0 +1,2 @@
+"scenario","rep","seed","pig_seed","n_genes","n_per_group","truth_de","a0","nu","balpha","nualpha","p_de","exact_lower","exact_upper","pig_movement_rate_mean","pig_movement_rate_median"
+"S4_severe_stress",1,20270431,21170431,20,3,5,1.5,1,0.8,0.7,0.1,-12,8.51719319141624,1,1

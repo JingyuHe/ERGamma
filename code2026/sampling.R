@@ -46,17 +46,29 @@ rPIG_ERGamma <- function(n, cc, N) {
 # Draw one sample from the power-truncated normal kernel
 # x^(m - 1) exp(-a x^2 + b x), x > 0.
 rH <- function(m, a, b, max_try = 5000) {
+  if (!is.finite(m) || !is.finite(a) || !is.finite(b) || m <= 0 || a <= 0) {
+    return(NA_real_)
+  }
+  if (abs(b) < 1e-12) {
+    return(sqrt(rgamma(1, shape = m / 2, rate = a)))
+  }
+  cval <- 2 * a * m / b^2
+  root <- sqrt(1 / 4 + cval)
   tau <- ifelse(
     b > 0,
-    0.5 + sqrt(1 / 4 + 2 * a * m / b^2),
-    -0.5 + sqrt(1 / 4 + 2 * a * m / b^2)
+    0.5 + root,
+    -0.5 + root
   )
-  v1 <- tau * abs(b) - b
+  v1 <- ifelse(
+    b > 0,
+    abs(b) * cval / (root + 0.5),
+    abs(b) * (root + 0.5)
+  )
   v2 <- tau * abs(b) / (2 * a)
 
   for (i in 1:max_try) {
     x <- rgamma(1, m, rate = v1)
-    if (runif(1) <= exp(-a * (x - v2)^2)) {
+    if (is.finite(x) && runif(1) <= exp(-a * (x - v2)^2)) {
       return(x)
     }
   }

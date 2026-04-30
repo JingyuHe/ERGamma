@@ -1,4 +1,4 @@
-"method","n_fit_probes","n_qpcr_assays","n_mapped_assays","n_validated_mapped","auc_scaled","auc_standard","spearman_probe_score_vs_gaga","n_de_at_fdr","gaga_fit_method","elapsed_gaga_seconds","elapsed_pig_seconds","pig_accept_rate_mean","pig_accept_rate_median","n_iter","burnin","thin","trunc","alpha_kernel","slice_width","slice_max_steps","qPCR_validation_engine"
-"GaGa",1000,1044,604,590,0.0206816586991799,0.913438256658596,1,1000,"EM",0.547000000000001,17.624,1,1,120,40,1,40,"slice",0.5,50,"limma"
-"PIG_MCMC_GaGa",1000,1044,604,590,0.0191137450111837,0.844188861985472,0.771772420800932,1000,"EM",0.547000000000001,17.624,1,1,120,40,1,40,"slice",0.5,50,"limma"
-"limma_F",1000,1044,604,590,0.0207309986404105,0.915617433414044,0.820480113360342,NA,"EM",0.547000000000001,17.624,1,1,120,40,1,40,"slice",0.5,50,"limma"
+"method","n_fit_probes","n_hyper_probes","n_qpcr_assays","n_mapped_assays","n_validated_mapped","auc_scaled","auc_standard","spearman_probe_score_vs_gaga","n_de_at_fdr","gaga_fit_method","gaga_hyper_fit_scope","elapsed_gaga_seconds","elapsed_pig_seconds","pig_accept_rate_mean","pig_accept_rate_median","n_iter","burnin","thin","trunc","alpha_kernel","slice_width","slice_max_steps","qPCR_validation_engine"
+"GaGa",1893,54675,1044,867,830,0.0324216531038767,0.793585151416477,1,1531,"EM","all_first_site_affy_probes",21.43,270.5,1,1,800,300,2,60,"slice",0.5,50,"limma"
+"PIG_MCMC_GaGa",1893,54675,1044,867,830,0.0301853559118199,0.738847281015956,0.976092377814312,1469,"EM","all_first_site_affy_probes",21.43,270.5,1,1,800,300,2,60,"slice",0.5,50,"limma"
+"limma_F",1893,54675,1044,867,830,0.0329497970570276,0.806512536633019,0.986721387229173,NA,"EM","all_first_site_affy_probes",21.43,270.5,1,1,800,300,2,60,"slice",0.5,50,"limma"

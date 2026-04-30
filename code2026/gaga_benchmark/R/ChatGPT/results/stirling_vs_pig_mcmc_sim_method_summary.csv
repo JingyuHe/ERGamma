@@ -1,0 +1,3 @@
+"method","n_de_mean","empirical_fdr_mean","power_mean","auc_mean","elapsed_seconds_mean"
+"GaGa_PIG_MCMC",0,0,0,0.993055555555556,0.23
+"GaGa_Stirling",3,0,0.75,0.986111111111111,0.00800000000000001

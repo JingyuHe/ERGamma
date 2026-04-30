@@ -1,0 +1,10 @@
+"scenario","method","fdr_target","n_selected_mean","empirical_fdr_mean","power_mean","auc_mean","avg_precision_mean"
+"S5_weak_signal","Exact",0.01,0,0,0,0.584140023271054,0.0911812471329481
+"S5_weak_signal","PIG_MCMC",0.01,0,0,0,0.582974299587152,0.0906018378580044
+"S5_weak_signal","Stirling",0.01,0,0,0,0.585285839925248,0.0931064356762837
+"S5_weak_signal","Exact",0.05,0,0,0,0.584140023271054,0.0911812471329481
+"S5_weak_signal","PIG_MCMC",0.05,0,0,0,0.582974299587152,0.0906018378580044
+"S5_weak_signal","Stirling",0.05,0,0,0,0.585285839925248,0.0931064356762837
+"S5_weak_signal","Exact",0.1,0,0,0,0.584140023271054,0.0911812471329481
+"S5_weak_signal","PIG_MCMC",0.1,0,0,0,0.582974299587152,0.0906018378580044
+"S5_weak_signal","Stirling",0.1,0,0,0,0.585285839925248,0.0931064356762837

@@ -1,0 +1,3 @@
+"dataset","n_genes","n_arrays","nDE_gaga","nDE_pig","nDE_limma","overlap_pig_gaga","only_pig","only_gaga","jaccard_pig_gaga","spearman_pp_pig_gaga","mean_abs_pp_diff","max_abs_pp_diff","median_alpha_pig"
+"Armstrong-Schliep",2194,42,360,362,361,354,8,6,0.96195652173913,0.997162917792207,0.0109065903124275,0.211732032224918,7.68945976029166
+"Armstrong-Orange",12533,42,388,660,2982,320,340,68,0.43956043956044,0.950914040221863,0.0394481291629656,0.987509393205145,48.9430374670045

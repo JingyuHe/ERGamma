@@ -1,0 +1,4 @@
+"method","n_DE","elapsed_sec","spearman_with_gaga_score","mean_abs_pp_diff_vs_gaga"
+"PIG_slice",362,38.7683353424072,0.99716291750734,0.0109065903124275
+"gaga_fitGG",360,NA,1,0
+"limma_BH",361,NA,0.612086216815518,NA

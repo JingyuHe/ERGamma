@@ -1,0 +1,10 @@
+"scenario","rep","method","fdr_target","n_selected","empirical_fdr","power","auc","avg_precision"
+"S3_low_alpha",1,"Exact",0.01,0,0,0,0.8,0.7625
+"S3_low_alpha",1,"Exact",0.05,0,0,0,0.8,0.7625
+"S3_low_alpha",1,"Exact",0.1,0,0,0,0.8,0.7625
+"S3_low_alpha",1,"Stirling",0.01,0,0,0,0.8,0.7625
+"S3_low_alpha",1,"Stirling",0.05,0,0,0,0.8,0.7625
+"S3_low_alpha",1,"Stirling",0.1,0,0,0,0.8,0.7625
+"S3_low_alpha",1,"PIG_MCMC",0.01,0,0,0,0.8,0.773109243697479
+"S3_low_alpha",1,"PIG_MCMC",0.05,0,0,0,0.8,0.773109243697479
+"S3_low_alpha",1,"PIG_MCMC",0.1,0,0,0,0.8,0.773109243697479

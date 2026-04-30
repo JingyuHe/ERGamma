@@ -1,0 +1,10 @@
+"scenario","method","fdr_target","n_selected_mean","empirical_fdr_mean","power_mean","auc_mean","avg_precision_mean"
+"S3_low_alpha","Exact",0.01,0,0,0,0.8,0.7625
+"S3_low_alpha","PIG_MCMC",0.01,0,0,0,0.8,0.773109243697479
+"S3_low_alpha","Stirling",0.01,0,0,0,0.8,0.7625
+"S3_low_alpha","Exact",0.05,0,0,0,0.8,0.7625
+"S3_low_alpha","PIG_MCMC",0.05,0,0,0,0.8,0.773109243697479
+"S3_low_alpha","Stirling",0.05,0,0,0,0.8,0.7625
+"S3_low_alpha","Exact",0.1,0,0,0,0.8,0.7625
+"S3_low_alpha","PIG_MCMC",0.1,0,0,0,0.8,0.773109243697479
+"S3_low_alpha","Stirling",0.1,0,0,0,0.8,0.7625

@@ -15,6 +15,16 @@ pig_mcmc_gaga_lib.R             per-gene PIG-augmented MCMC sampler
 04_armstrong_pig_mcmc_gaga.R    Armstrong vs gaga::fitGG
 05_maqc_pig_mcmc_gaga.R         MAQC vs gaga::fitGG and limma_F
 06_run_pig_mcmc_all.R           run both real-data examples
+07_simulate_stirling_vs_pig_mcmc.R
+                                simulation: same fitGG EM hyperparameters,
+                                Stirling scorer vs PIG-MCMC scorer
+08_oracle_stirling_pig_simulation.R
+                                oracle simulation with exact quadrature,
+                                Stirling scorer, and PIG-MCMC scorer
+09_summarize_oracle_paper_simulation.R
+                                combines per-scenario oracle simulation runs
+10_empirical_report.R           organizes original GaGa empirical reproduction
+                                and PIG-MCMC empirical results
 ```
 
 The MCMC path samples `z_i` and `alpha_i`; benchmark posterior probabilities

@@ -317,6 +317,9 @@ pig_mcmc_gaga_pp <- function(x, groups, patterns, fit, max_genes = 0,
   alpha_kernel <- match.arg(alpha_kernel)
 
   par <- gaga::getpar(fit)
+  if (length(par$a0) != 1 || length(par$nu) != 1) {
+    stop("pig_mcmc_gaga_pp currently supports GaGa nclust=1 only.")
+  }
   hyper <- list(
     alpha0 = as.numeric(par$a0[1]),
     nu = as.numeric(par$nu[1]),
@@ -378,8 +381,11 @@ pig_mcmc_gaga_pp <- function(x, groups, patterns, fit, max_genes = 0,
         n_prop <- n_prop + as.integer(step$proposed)
       }
       if (iter > burnin && ((iter - burnin) %% thin == 0)) {
+        z_prob_keep <- pattern_prob_from_log(
+          pig_pattern_logprob(alpha, i, stats, probpat, hyper)
+        )
         counts[z] <- counts[z] + 1L
-        prob_sum <- prob_sum + z_prob
+        prob_sum <- prob_sum + z_prob_keep
         alpha_sum <- alpha_sum + alpha
         n_keep <- n_keep + 1L
       }

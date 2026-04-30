@@ -1,0 +1,4 @@
+"dataset","n_features","metric_used","gaga_value","pig_value","spearman_pig_vs_gaga","mean_abs_pp_diff"
+"Armstrong (Schliep mirror)",2194,"#DE @ FDR=0.05","360","362","0.9972","0.0109"
+"Armstrong (Orange mirror)",12533,"#DE @ FDR=0.05","388","660","0.9509","0.0394"
+"MAQC",5000,"AUC vs qPCR validation","0.9449","0.9449","0.8758","0.1965"

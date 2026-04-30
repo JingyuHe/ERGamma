@@ -1,0 +1,10 @@
+"scenario","rep","method","fdr_target","n_selected","empirical_fdr","power","auc","avg_precision"
+"S4_severe_stress",1,"Exact",0.01,0,0,0,0.47265625,0.190157799008176
+"S4_severe_stress",1,"Exact",0.05,0,0,0,0.47265625,0.190157799008176
+"S4_severe_stress",1,"Exact",0.1,0,0,0,0.47265625,0.190157799008176
+"S4_severe_stress",1,"Stirling",0.01,5,1,0,0.4541015625,0.183260868698521
+"S4_severe_stress",1,"Stirling",0.05,5,1,0,0.4541015625,0.183260868698521
+"S4_severe_stress",1,"Stirling",0.1,5,1,0,0.4541015625,0.183260868698521
+"S4_severe_stress",1,"PIG_MCMC",0.01,0,0,0,0.478515625,0.194329314721768
+"S4_severe_stress",1,"PIG_MCMC",0.05,0,0,0,0.478515625,0.194329314721768
+"S4_severe_stress",1,"PIG_MCMC",0.1,0,0,0,0.478515625,0.194329314721768

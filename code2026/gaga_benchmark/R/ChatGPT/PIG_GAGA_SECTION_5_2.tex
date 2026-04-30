@@ -1,0 +1,278 @@
+\subsection{The GaGa Model for Differential Expression}
+\label{sec:gaga-pig}
+
+\cite{Rossell2009GaGa} introduced the Gamma-Gamma, or GaGa, model for
+detecting differential expression in microarray experiments.  The model is
+particularly relevant for small-sample genomic studies, where thousands of
+genes are measured but each experimental condition has only a small number of
+replicates.  In this setting, gene-specific likelihood fits are unstable, and
+the GaGa model borrows information across genes through an empirical-Bayes
+hierarchy.  A central computational difficulty is that posterior inference for
+the gene-specific gamma shape parameter involves ratios of gamma functions.
+The original implementation evaluates this layer using a Stirling-based
+approximation.  Our P-IG augmentation provides a direct posterior sampler for
+the same gamma-shape layer, allowing us to replace the approximation while
+leaving the empirical-Bayes GaGa structure unchanged.
+
+Let $x_{ij}$ denote the expression measurement for gene $i$ in sample $j$, and
+let $g(j)$ be the experimental group of sample $j$.  A pattern
+$z_i \in \{0,\ldots,H-1\}$ partitions the experimental groups into clusters
+$c \in \mathcal{C}_{z_i}$; groups in the same cluster share a mean expression
+level, whereas groups in different clusters have distinct means.  Conditional
+on $z_i=h$, the GaGa model used here is
+\begin{align}
+x_{ij}\mid \alpha_i,\lambda_{ic}, z_i=h
+  &\sim \Ga\left(\alpha_i,\alpha_i/\lambda_{ic}\right),
+  \qquad c=c_h\{g(j)\},
+  \label{eq:gaga-likelihood}
+\\
+q_{ic}=\lambda_{ic}^{-1}\mid a_0,\nu
+  &\sim \Ga\left(a_0,a_0/\nu\right),
+  \label{eq:gaga-lambda-prior}
+\\
+\alpha_i\mid b_\alpha,\nu_\alpha
+  &\sim \Ga\left(b_\alpha,b_\alpha/\nu_\alpha\right),
+  \qquad
+z_i\mid \pi \sim \mathrm{Categorical}(\pi_0,\ldots,\pi_{H-1}).
+  \label{eq:gaga-alpha-prior}
+\end{align}
+Here we use the rate parameterization of the gamma distribution.  The
+hyperparameters
+$\theta=(a_0,\nu,b_\alpha,\nu_\alpha,\pi)$ are estimated by the original GaGa
+empirical-Bayes EM algorithm.  In the comparisons below we deliberately keep
+these estimates fixed and replace only the posterior scoring step.  This
+isolates the effect of replacing the Stirling approximation with P-IG
+augmentation.
+
+For a fixed pattern $h$ and cluster $c$, define
+\[
+n_{ic}=|\{j:g(j)\in c\}|,\qquad
+S_{ic}=\sum_{j:g(j)\in c}x_{ij},\qquad
+L_{ic}=\sum_{j:g(j)\in c}\log x_{ij},\qquad
+r_0=a_0/\nu .
+\]
+After integrating out $q_{ic}$, the collapsed cluster likelihood is
+\begin{align}
+m_{ic}(\alpha_i)
+&=
+\frac{\alpha_i^{n_{ic}\alpha_i}}{\Gamma(\alpha_i)^{n_{ic}}}
+\exp\{(\alpha_i-1)L_{ic}\}
+\frac{r_0^{a_0}}{\Gamma(a_0)}
+\frac{\Gamma(a_0+n_{ic}\alpha_i)}
+     {(r_0+\alpha_i S_{ic})^{a_0+n_{ic}\alpha_i}} .
+\label{eq:gaga-collapsed}
+\end{align}
+Thus, for fixed $\alpha_i$, the posterior probability of pattern $h$ is
+\begin{align}
+\Pr(z_i=h\mid \alpha_i,x_i,\theta)
+\propto
+\pi_h \prod_{c\in\mathcal{C}_h}m_{ic}(\alpha_i).
+\label{eq:gaga-pattern-update}
+\end{align}
+Given $z_i=h$, the collapsed conditional density of $\alpha_i$ is proportional
+to
+\begin{align}
+p(\alpha_i\mid z_i=h,x_i,\theta)
+\propto
+\alpha_i^{b_\alpha-1}\exp\{-(b_\alpha/\nu_\alpha)\alpha_i\}
+\prod_{c\in\mathcal{C}_h}m_{ic}(\alpha_i).
+\label{eq:gaga-alpha-collapsed}
+\end{align}
+The difficult component is the gamma-shape ratio
+$\prod_c \Gamma(a_0+n_{ic}\alpha_i)/\Gamma(\alpha_i)^{n_{ic}}$, which is the
+part approximated in the original GaGa scoring algorithm.
+
+Our sampler targets \eqref{eq:gaga-alpha-collapsed} using P-IG augmentation.
+Let $N_i=\sum_c n_{ic}$ and draw
+\[
+\omega_{is}\mid \alpha_i \iid \PIG(\alpha_i),
+\qquad s=1,\ldots,N_i,
+\]
+for the reciprocal gamma terms, and draw Damsleth auxiliary variables
+\[
+\tau_{ic}\mid \alpha_i \sim \Ga(a_0+n_{ic}\alpha_i,1),
+\qquad c\in\mathcal{C}_{z_i},
+\]
+for the numerator gamma terms.  With
+$\Omega_i=\sum_{s=1}^{N_i}\omega_{is}$ and
+\[
+B_i
+=N_i\gamma+\sum_{c}L_{ic}-b_\alpha/\nu_\alpha
+  +\sum_c n_{ic}\log\tau_{ic},
+\]
+the augmented conditional density for $y_i=\log\alpha_i$, including the
+Jacobian, is
+\begin{align}
+\ell_i(y_i)
+&=
+(N_i+b_\alpha)y_i
+-\Omega_i\exp(2y_i)
++B_i\exp(y_i)
++R_i\{\exp(y_i)\},
+\label{eq:gaga-pig-logalpha}
+\\
+R_i(\alpha)
+&=
+N_i\alpha\log\alpha
+-\sum_c(a_0+n_{ic}\alpha)\log(r_0+\alpha S_{ic}).
+\nonumber
+\end{align}
+We sample $y_i$ by stepping-out slice sampling from
+\eqref{eq:gaga-pig-logalpha}.  This is an exact Markov transition for the
+P-IG-augmented conditional distribution.  The resulting per-gene sampler is:
+\begin{enumerate}
+\item sample $z_i$ from \eqref{eq:gaga-pattern-update};
+\item conditional on $z_i$, draw $\omega_{is}$ and $\tau_{ic}$;
+\item sample $y_i=\log\alpha_i$ from \eqref{eq:gaga-pig-logalpha};
+\item after burn-in, estimate posterior pattern probabilities by the
+Rao--Blackwellized average
+\[
+\widehat p_{ih}
+=
+\frac{1}{T}\sum_{t=1}^{T}
+\Pr\{z_i=h\mid \alpha_i^{(t)},x_i,\widehat\theta\}.
+\]
+\end{enumerate}
+The differential-expression score is $1-\widehat p_{i0}$, where pattern $0$
+is the all-equal null pattern.
+
+\textit{Oracle simulation.}
+We first studied the posterior scoring layer in isolation.  Data were generated
+from the GaGa model under fixed oracle hyperparameters, and each data set was
+scored three ways: (i) high-accuracy one-dimensional quadrature over
+$\alpha_i$, treated as the gold standard; (ii) the original GaGa
+Stirling-based scorer; and (iii) the P-IG MCMC scorer above.  We used
+six regimes spanning the paper-like high-shape setting, benign moderate
+settings, low-shape/high-CV settings, and weak-signal settings.  Each regime
+used 50 replicated data sets with 400 genes.  The P-IG sampler used 1000
+iterations, 400 burn-in iterations, thinning by 2, and P-IG truncation 50.
+
+Table~\ref{tab:gaga-oracle-simulation} summarizes the results.  In the
+paper-like and benign regimes, the original Stirling approximation is already
+essentially indistinguishable from exact quadrature.  In these regimes P-IG
+MCMC produces the same decisions up to Monte Carlo error.  The advantage of
+the P-IG construction appears in the low-shape regimes.  In the severe stress
+setting $(a_0=1.5,b_\alpha=0.8,\nu_\alpha=0.7,n_g=3)$, the mean absolute error
+of the original Stirling posterior null probability is 0.0428, compared with
+0.0014 for P-IG MCMC.  At a nominal posterior FDR threshold of 0.05, the exact
+scorer selects on average 0.10 genes and P-IG MCMC selects 0.16 genes, whereas
+the Stirling scorer selects 16.50 genes with empirical FDR 0.832.
+
+\begin{table}[t]
+\centering
+\caption{Oracle GaGa simulation comparing original Stirling scoring and
+P-IG MCMC scoring against exact quadrature.  MAE is the mean absolute error in
+the posterior null probability $p_{i0}$ relative to exact quadrature.  FDR is
+the empirical false discovery rate among genes selected at posterior FDR 0.05.
+Numbers in parentheses are Monte Carlo standard errors over 50 replicates.}
+\label{tab:gaga-oracle-simulation}
+\smallskip
+\renewcommand{\arraystretch}{1.12}
+\setlength{\tabcolsep}{4pt}
+{\footnotesize
+\begin{tabular}{@{}llrrrl@{}}
+\toprule
+\textbf{Regime} & \textbf{Method} &
+\textbf{MAE($p_{i0}$)} &
+\textbf{Spearman} &
+\textbf{Selected} &
+\textbf{FDR} \\
+\midrule
+Paper-like & Stirling & 0.0000 (0.0000) & 1.0000 & 35.54 (0.87) & 0.038 (0.003) \\
+           & P-IG MCMC & 0.0058 (0.0002) & 0.9983 & 33.42 (0.84) & 0.016 (0.003) \\
+Benign & Stirling & 0.0000 (0.0000) & 1.0000 & 25.06 (0.74) & 0.051 (0.005) \\
+       & P-IG MCMC & 0.0064 (0.0001) & 0.9944 & 25.14 (0.77) & 0.059 (0.005) \\
+Moderate small-$n$ & Stirling & 0.0002 (0.0000) & 0.9998 & 2.86 (0.29) & 0.048 (0.025) \\
+                  & P-IG MCMC & 0.0054 (0.0001) & 0.9975 & 3.08 (0.30) & 0.051 (0.023) \\
+Low shape & Stirling & 0.0029 (0.0002) & 0.9886 & 0.40 (0.09) & 0.190 (0.055) \\
+          & P-IG MCMC & 0.0017 (0.0000) & 0.9995 & 0.08 (0.04) & 0.000 (0.000) \\
+Severe stress & Stirling & 0.0428 (0.0013) & 0.9048 & 16.50 (0.67) & 0.832 (0.012) \\
+              & P-IG MCMC & 0.0014 (0.0000) & 0.9995 & 0.16 (0.05) & 0.020 (0.020) \\
+Weak signal & Stirling & 0.0007 (0.0000) & 0.9918 & 0.00 (0.00) & 0.000 (0.000) \\
+            & P-IG MCMC & 0.0010 (0.0000) & 0.9985 & 0.00 (0.00) & 0.000 (0.000) \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\textit{Empirical comparison with GaGa.}
+We next applied the same plug-in empirical-Bayes strategy to the two empirical
+examples considered by \cite{Rossell2009GaGa}.\footnote{The empirical data used
+here are the closest public versions we could recover, not the exact
+preprocessed analysis objects used by \cite{Rossell2009GaGa}.  For the
+Armstrong leukemia example, the original raw CEL archives needed to reproduce
+the authors' \texttt{just.gcrma} preprocessing were not available from the
+original links at the time of our replication.  We therefore used the processed
+Schliep mirror, downloaded as \texttt{armstrong-2002-v2\_database.txt} from the
+Schliep supplementary data page \texttt{armstrong-2002-v2.html}; we also checked
+the Broad/Orange processed mirrors, but report the Schliep version because it
+gave the closest match to the GaGa empirical figures.  For MAQC, we downloaded
+the public NCBI GEO GSE5350 series-matrix and annotation files:
+\texttt{GSE5350-GPL570\_series\_matrix.txt.gz} for the Affymetrix arrays,
+\texttt{GSE5350-GPL4097\_TaqMan\_series\_matrix.txt.gz} for the TaqMan qPCR
+assays, and the corresponding GPL570/GPL4097 platform annotation files.  The
+empirical results should therefore be read as a reproduction from currently
+available public data, rather than a bit-for-bit rerun of the original GaGa
+data objects.}  First, for the Armstrong
+leukemia data comparing ALL and MLL samples, we used the recovered public
+Schliep-filtered data set with 2194 genes and 42 samples.  The original GaGa
+reproduction selected 360 genes at posterior FDR 0.05.  Replacing only the
+posterior scorer by P-IG MCMC again selected 360 genes; 354 genes were common
+to both lists, giving Jaccard overlap 0.967.  The Spearman correlation between
+the original GaGa differential-expression score and the P-IG MCMC score was
+0.999, with mean absolute score difference 0.0062.
+
+Second, for the MAQC validation study, we fitted the GaGa empirical-Bayes
+hyperparameters on all 54,675 first-site Affymetrix probes and then evaluated
+the P-IG scorer on the 1893 Affymetrix probes mapped to qPCR assays.  This
+mirrors the original empirical-Bayes use of all genes while keeping the P-IG
+computation focused on the validation set.  The original GaGa validation AUC
+was 0.794, MiGaGa2 gave 0.791, and limma gave 0.807 in our reproduction.  On
+the same qPCR-mapped probes, the P-IG MCMC scorer gave AUC 0.739.  The P-IG
+score remained highly correlated with the original GaGa score
+(Spearman correlation 0.976), but was more conservative: at posterior FDR 0.05
+the original GaGa scorer selected 1531 probes, whereas P-IG MCMC selected 1469.
+The most probable pattern counts also shifted toward the null and intermediate
+patterns: among the 1893 qPCR-mapped probes, original GaGa assigned 445, 71,
+263, 106, and 1008 probes to patterns 0--4, respectively, while P-IG MCMC
+assigned 498, 66, 414, 111, and 804 probes.
+
+\begin{table}[t]
+\centering
+\caption{Empirical comparison between original GaGa scoring and P-IG MCMC
+scoring.  Hyperparameters are estimated by the original GaGa empirical-Bayes
+EM algorithm in both methods; P-IG MCMC changes only the posterior scoring
+step.}
+\label{tab:gaga-empirical}
+\smallskip
+\renewcommand{\arraystretch}{1.12}
+\setlength{\tabcolsep}{5pt}
+{\footnotesize
+\begin{tabular}{@{}llrrrr@{}}
+\toprule
+\textbf{Data set} & \textbf{Method} & \textbf{Selected} &
+\textbf{AUC} & \textbf{Spearman} & \textbf{Notes} \\
+\midrule
+Armstrong ALL--MLL & Original GaGa & 360 & -- & 1.000 & 2194 genes \\
+                   & P-IG MCMC & 360 & -- & 0.999 & 354 overlapping calls \\
+\midrule
+MAQC validation & Original GaGa & 1531 & 0.794 & 1.000 & 1893 qPCR-mapped probes \\
+                & P-IG MCMC & 1469 & 0.739 & 0.976 & Same EM hyperparameters \\
+                & limma & -- & 0.807 & 0.987 & Reference method \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+These experiments clarify the role of the P-IG replacement.  The method is not
+intended to change the empirical-Bayes GaGa hierarchy or to introduce a new
+hyperparameter estimator.  Instead, it replaces the Stirling-based gamma-shape
+posterior scoring step by an exact data-augmented MCMC calculation.  When the
+shape parameters lie in the high-shape regimes typical of the Armstrong data,
+the original approximation is already accurate and P-IG MCMC produces nearly
+identical calls.  In low-shape, high-CV regimes, however, the oracle simulation
+shows that the Stirling scorer can substantially distort posterior null
+probabilities and posterior FDR decisions, while P-IG MCMC remains close to
+exact quadrature.  The MAQC results suggest that on real validation data the
+P-IG scorer can be somewhat more conservative than the original GaGa scorer.
+Thus the main empirical message is one of robustness: P-IG MCMC preserves the
+behavior of GaGa in ordinary regimes and provides a principled safeguard in
+the regimes where the Stirling approximation is least reliable.

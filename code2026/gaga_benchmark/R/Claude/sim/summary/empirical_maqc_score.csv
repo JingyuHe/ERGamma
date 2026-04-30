@@ -1,0 +1,2 @@
+"dataset","n_probes","spearman_pp_pig_gaga","mean_abs_pp_diff","AUC_PIG","AUC_gaga","AUC_limma"
+"MAQC",5000,0.885789366623674,0.196493557191891,0.94488188976378,0.94488188976378,0.952755905511811

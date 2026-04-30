@@ -51,6 +51,7 @@ plot_validation_curves <- function(curves, out_pdf, out_png) {
 
 method <- Sys.getenv("PIG_MCMC_MAQC_FIT_METHOD", unset = "EM")
 max_probes <- env_int("PIG_MCMC_MAQC_MAX_PROBES", 1000)
+fit_all_hyper <- Sys.getenv("PIG_MCMC_MAQC_FIT_ALL_HYPER", unset = "1") != "0"
 fdr <- env_num("PIG_MCMC_MAQC_FDR", 0.05)
 progress_every <- env_int("PIG_MCMC_MAQC_PROGRESS_EVERY", 250)
 seed <- env_int("PIG_MCMC_MAQC_SEED", 2026)
@@ -107,6 +108,7 @@ affy_map <- make_affy_symbol_map(gpl570)
 mapped_probes <- unique(affy_map$probe_id[affy_map$symbol %in% qpcr_symbols])
 mapped_probes <- intersect(mapped_probes, rownames(affy_1))
 affy_fit <- affy_1[mapped_probes, , drop = FALSE]
+affy_hyper <- if (fit_all_hyper) affy_1 else affy_fit
 
 if (max_probes > 0 && max_probes < nrow(affy_fit)) {
   vars <- apply(log2(pmax(affy_fit, .Machine$double.eps)), 1, stats::var)
@@ -119,6 +121,7 @@ patterns <- maqc_patterns()
 
 cat("MAQC PIG-MCMC-GaGa benchmark\n")
 cat("  probes=", nrow(affy_fit),
+    " hyper_probes=", nrow(affy_hyper),
     " arrays=", ncol(affy_fit),
     " mapped_qpcr_symbols=", length(qpcr_symbols),
     " iter=", n_iter,
@@ -132,8 +135,11 @@ cat("  qPCR validation p-values from ",
     "\n", sep = "")
 
 elapsed_gaga <- system.time({
-  gg_fit <- fit_gaga_fallback(affy_fit, groups_affy, patterns, method = method)
+  gg_fit <- fit_gaga_fallback(affy_hyper, groups_affy, patterns, method = method)
+  rownames(gg_fit$pp) <- rownames(affy_hyper)
 })[["elapsed"]]
+
+gg_pp <- gg_fit$pp[rownames(affy_fit), , drop = FALSE]
 
 elapsed_pig <- system.time({
   pig <- pig_mcmc_gaga_pp(
@@ -151,7 +157,7 @@ elapsed_pig <- system.time({
   )
 })[["elapsed"]]
 
-gaga_score <- 1 - gg_fit$pp[, 1]
+gaga_score <- 1 - gg_pp[, 1]
 pig_score <- 1 - pig$pp[, 1]
 limma_p <- limma_f_pvalue(affy_fit, groups_affy)
 limma_score <- -log10(pmax(limma_p, 1e-300))
@@ -159,15 +165,14 @@ names(gaga_score) <- rownames(affy_fit)
 names(pig_score) <- rownames(affy_fit)
 
 pig_calls <- find_pig_mcmc_calls(pig$pp, fdr = fdr)
-gaga_calls <- as.logical(gaga::findgenes(gg_fit, affy_fit, as.character(groups_affy),
-                                         fdrmax = fdr, parametric = TRUE)$d)
+gaga_calls <- find_pig_mcmc_calls(gg_pp, fdr = fdr)
 
 probe_scores <- data.frame(
   probe_id = rownames(affy_fit),
   gaga_score = gaga_score,
   pig_mcmc_score = pig_score,
   limma_score = limma_score,
-  gaga_pp_null = gg_fit$pp[, 1],
+  gaga_pp_null = gg_pp[, 1],
   pig_mcmc_pp_null = pig$pp[, 1],
   gaga_call = gaga_calls,
   pig_mcmc_call = pig_calls,
@@ -178,7 +183,7 @@ probe_scores <- data.frame(
 
 pattern_counts <- rbind(
   data.frame(method = "GaGa", pattern = 0:4,
-             count = as.integer(tabulate(max.col(gg_fit$pp, ties.method = "first"), nbins = 5))),
+             count = as.integer(tabulate(max.col(gg_pp, ties.method = "first"), nbins = 5))),
   data.frame(method = "PIG_MCMC_GaGa", pattern = 0:4,
              count = as.integer(tabulate(max.col(pig$pp, ties.method = "first"), nbins = 5)))
 )
@@ -204,6 +209,7 @@ for (m in names(method_scores)) {
   summary_rows[[m]] <- data.frame(
     method = m,
     n_fit_probes = nrow(affy_fit),
+    n_hyper_probes = nrow(affy_hyper),
     n_qpcr_assays = nrow(qpcr_info),
     n_mapped_assays = nrow(dat),
     n_validated_mapped = sum(dat$validated),
@@ -222,6 +228,7 @@ curves <- do.call(rbind, curve_rows)
 validation_scores <- do.call(rbind, score_rows)
 summary <- do.call(rbind, summary_rows)
 summary$gaga_fit_method <- gg_fit$method_used
+summary$gaga_hyper_fit_scope <- if (fit_all_hyper) "all_first_site_affy_probes" else "qPCR_mapped_probe_set"
 summary$elapsed_gaga_seconds <- elapsed_gaga
 summary$elapsed_pig_seconds <- elapsed_pig
 summary$pig_accept_rate_mean <- mean(pig$accept_rate, na.rm = TRUE)
@@ -248,6 +255,7 @@ write.csv(pattern_counts, chatgpt_result_file("maqc_pig_mcmc_gaga_pattern_counts
 saveRDS(
   list(config = list(max_probes = max_probes, fdr = fdr,
                      fit_method = method, seed = seed,
+                     fit_all_hyper = fit_all_hyper,
                      n_iter = n_iter, burnin = burnin, thin = thin,
                      trunc = trunc, alpha_steps = alpha_steps,
                      alpha_kernel = alpha_kernel,

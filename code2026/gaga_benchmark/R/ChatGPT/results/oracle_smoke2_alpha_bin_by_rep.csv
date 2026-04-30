@@ -1,0 +1,9 @@
+"scenario","rep","method","alpha_bin","n","mae_pp0","q95_abs_pp0"
+"S4_severe_stress",1,"Stirling","<1",14,0.0089232204909659,0.0222240107814985
+"S4_severe_stress",1,"Stirling","1-3",6,0.00289156065152468,0.0042717421238701
+"S4_severe_stress",1,"Stirling","3-10",0,NA,NA
+"S4_severe_stress",1,"Stirling",">=10",0,NA,NA
+"S4_severe_stress",1,"PIG_MCMC","<1",14,0.00546865019084288,0.021577531401286
+"S4_severe_stress",1,"PIG_MCMC","1-3",6,0.00809363876528862,0.0188747703561319
+"S4_severe_stress",1,"PIG_MCMC","3-10",0,NA,NA
+"S4_severe_stress",1,"PIG_MCMC",">=10",0,NA,NA
