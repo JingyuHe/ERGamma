@@ -22,6 +22,12 @@ each prior setting, a P-IG truncation experiment over
 `N in {50, 100, 200, 500, 1000}`, and a low-shape stress test at
 `alpha_true in {0.05, 0.10}` with `n=100`.
 
+All simulations are reproducible from a fixed seed. The full benchmark runner
+uses seed `20260430` by default and initializes each data set or sampler task
+with `seed + 1009 * task_id`. The chain-length exactness experiment also uses
+seed `20260430`, with deterministic cell-specific data seeds and independent
+chain seeds.
+
 ## Main Cross-Regime Results
 
 Across the 18 main cells, P-IG Gibbs produced a mean KS distance of 0.0433
@@ -46,6 +52,39 @@ reference in this one-dimensional problem, with mean KS 0.0024 across the main
 cells. This makes Miller-Gamma the strongest deterministic approximation in the
 study. The Stirling approximation was substantially less reliable, with mean
 KS 0.3358 and mean empirical coverage 0.7375.
+
+These main results should not be interpreted as a failure of the P-IG identity.
+They show that, for a one-dimensional posterior where tailor-made proposals are
+available, P-IG Gibbs has larger finite-chain Monte Carlo error at the same
+nominal iteration count. Its value is that it gives an exact conditional
+augmentation for gamma-function terms, not that it is automatically the fastest
+1D sampler.
+
+## Exactness and Chain Length
+
+To separate exactness from finite-chain efficiency, we fixed three
+representative posterior targets and ran P-IG Gibbs for `5000`, `20000`, and
+`100000` iterations with four independent chain seeds. The three targets were
+low shape (`alpha_true=0.1, n=100`), moderate shape (`alpha_true=5, n=50`), and
+high shape with large sample size (`alpha_true=20, n=500`). Miller-Gamma and
+Stirling-Gamma were evaluated once on the same targets as deterministic
+reference lines.
+
+The P-IG error decreased systematically as the chain length increased. In the
+low-shape target, P-IG KS dropped from 0.0139 at 5000 iterations to 0.0073 at
+20000 and 0.0034 at 100000. The Stirling approximation on the same target had
+KS 0.954, which cannot be reduced by running longer. In the moderate-shape
+target, P-IG KS dropped from 0.0506 to 0.0286 and then 0.0109, while
+Stirling-Gamma stayed at 0.0500. In the high-shape large-`n` target, P-IG KS
+dropped from 0.1401 to 0.1062 and then 0.0164, whereas Stirling-Gamma was
+0.0545.
+
+This experiment is the cleanest way to state the benefit of exact augmentation.
+P-IG error is Monte Carlo error around the exact posterior and can be reduced
+with more simulation. Approximation error is algorithmic bias: it can be small,
+as for Miller-Gamma in these one-dimensional examples, or large, as for
+Stirling-Gamma in low-shape regimes, but it does not vanish with more MCMC
+iterations.
 
 ## Low-Shape Stress Test
 
@@ -101,11 +140,13 @@ but also show its higher Monte Carlo cost.
 The strengthened simulation supports a narrower and more defensible claim than
 the earlier draft. P-IG Gibbs is an exact data-augmentation sampler for the
 integer-posterior-delta gamma shape problem and remains accurate across
-low-shape, moderate-shape, and high-shape regimes. However, it is not the most
-efficient method for this one-dimensional inference problem. Miller-IMH is a
-very strong exact competitor, and Miller's direct gamma approximation is nearly
-indistinguishable from the numerical posterior in the tested regimes. The
-principal practical advantage of the new simulation section is therefore not
-that P-IG dominates existing methods, but that it clearly identifies where the
-older Stirling approximation fails and where the current P-IG construction is
-limited by integer posterior `delta` and computational cost.
+low-shape, moderate-shape, and high-shape regimes when enough Monte Carlo
+effort is used. However, it is not the most efficient method for this
+one-dimensional inference problem. Miller-IMH is a very strong exact
+competitor, and Miller's direct gamma approximation is nearly indistinguishable
+from the numerical posterior in the tested regimes. The principal practical
+advantage of P-IG is that it converts gamma-function normalizing constants into
+an exact auxiliary-variable update that can be embedded in larger Gibbs
+samplers. The simulation section should therefore frame P-IG as an exact
+augmentation device that avoids approximation bias, while honestly reporting
+its computational cost and its current integer-posterior-delta limitation.

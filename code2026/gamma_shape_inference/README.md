@@ -74,6 +74,20 @@ Rscript code2026/gamma_shape_inference/make_gamma_shape_manuscript_tables.R \
   --result-dirs code2026/gamma_shape_inference/results/all_full_benchmarks_no_pig,code2026/gamma_shape_inference/results/all_full_pig_only_fixed
 ```
 
+To show that P-IG error is Monte Carlo error rather than deterministic
+approximation bias, run the fixed-target chain-length experiment:
+
+```sh
+Rscript code2026/gamma_shape_inference/run_pig_exactness_chain_length.R \
+  --seed 20260430 --reps 4 --iter-values 5000,20000,100000 \
+  --cores 8 --chunk-size 8 \
+  --out-dir code2026/gamma_shape_inference/results/pig_exactness_chain_length
+```
+
+All runners set seeds explicitly.  The checkpoint runner defaults to
+`--seed 20260430` and initializes each task by `seed + 1009 * task_id`, so a
+run is reproducible when the command and task suite are unchanged.
+
 The legacy runner remains useful for small focused checks:
 
 Damsleth replication:
